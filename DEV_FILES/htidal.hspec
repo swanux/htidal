@@ -1,0 +1,52 @@
+[platform]
+os = debian
+arch = amd64
+
+[packager]
+name = Dániel Kolozsi
+email = dani@kolozsi.net
+
+[general_details]
+pkgname = htidal
+pretty_name = HTidal
+licensev = 0
+version = 0.1.1
+section = 18
+priority = 0
+depends = ${misc:Depends}
+	${python3:Depends}
+	python3-gi
+	bash (>= 4.4-5)
+	python3-tidalapi (>= 0.7)
+	python3-srt
+	python3-gst-1.0
+	python3-dateutil (>= 2.8.1-4)
+build_deps = debhelper (>= 11)
+	dh-python
+	python3
+	python3-all
+homepage = https://github.com/swanux/htidal
+
+[description]
+short = Tidal client for Linux using tidalapi, python and GTK3
+longue = Tidal client for Linux using tidalapi, python and GTK3
+
+[misc]
+rules = 0
+min_pyver = 3.2
+postinst = 
+postrm = 
+
+[changelog]
+target = bionic
+urgency = 1
+changes = Initial release
+
+[data]
+root = /home/daniel/GitRepos/htidal/DEV_FILES
+program = icons/
+	db/
+	htidal.glade
+	htidal.py
+entry = htidal.desktop
+
