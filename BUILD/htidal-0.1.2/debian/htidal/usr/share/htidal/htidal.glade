@@ -2362,7 +2362,7 @@ It's essential to make sure we don't send too many requests to Tidal servers.</p
                         <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">OR
 
-You can contact me at swanux@e.email as well.
+You can contact me at swanux@protonmail.com as well.
 
 Don't forget to provide track ID with your request!</property>
                         <property name="justify">center</property>

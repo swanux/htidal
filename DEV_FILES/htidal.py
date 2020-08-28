@@ -149,7 +149,7 @@ class GUI:
         tC.submit(self.check)
 
     def on_req_clicked(self, button):
-        webbrowser.open_new("https://github.com/swanux/htidal/issues/new?assignees=swanux&labels=enhancement&template=request-template.md&title=Request+lyrics+for+artistnameHere")
+        webbrowser.open_new("https://github.com/swanux/htidal_db/issues/new?assignees=swanux&labels=enhancement&template=custom.md&title=Lyrics+request")
 
     def on_main_delete_event(self, window, e):
         # Getting the window position

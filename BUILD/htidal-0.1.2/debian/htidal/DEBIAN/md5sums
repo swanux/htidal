@@ -1,5 +1,5 @@
 c93d6b2d271adb436a869461eaa87ffd  usr/share/applications/htidal.desktop
-bd7d63d6c8b10a4b47a3da978375378f  usr/share/doc/htidal/changelog.Debian.gz
+f3dfb79aca0cff50c061632a1ceefa37  usr/share/doc/htidal/changelog.Debian.gz
 58db3cfce37f04d3ba28cffd1e6d0a55  usr/share/doc/htidal/copyright
 ce70876712edcd9eba559bc415bf5a0f  usr/share/htidal/db/A_Night_Like_This-13036301.srt
 d6e6c362b166e9eddc2a8e9c080e9fc1  usr/share/htidal/db/Absolutely_Me-13432691.srt
@@ -51,7 +51,7 @@ a2a894dae7f877a509e40a31eb5f3c87  usr/share/htidal/db/Told_My_Ma-5485002.srt
 4c4d05e04a07108127df75ef78ee19aa  usr/share/htidal/db/Voulez-Vous-1771757.srt
 75bfab83e7be4c4419abf1661601797e  usr/share/htidal/db/Whatchugot-71073766.srt
 4b1139850a39994e9be9dbd7cad9a4be  usr/share/htidal/db/Would_I_Lie_to_You?_Remastered_Version-26883.srt
-39f2fa04c9a36b8230b411173f4c50e9  usr/share/htidal/htidal.glade
-a2f6c4319a33638aa38c857d7ef7ff3b  usr/share/htidal/htidal.py
+fce80162755fa87d3208ba3159011491  usr/share/htidal/htidal.glade
+f9e6bff37c0a1f2310d9888753b86f4f  usr/share/htidal/htidal.py
 fd87ecdee187df1bc3e1f5c779000ca5  usr/share/htidal/icons/htidal.png
 702ba5d7612e92220f30b0c1071c838e  usr/share/python3/runtime.d/htidal.rtupdate
