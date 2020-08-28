@@ -20,3 +20,5 @@ Tidal client for Linux using tidalapi, Python3 and GTK3
 Tidal API: https://github.com/tamland/python-tidal
 
 GTK3: https://www.gtk.org
+
+htidal_db: https://github.com/swanux/htidal_db
