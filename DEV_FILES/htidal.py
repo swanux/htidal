@@ -784,7 +784,7 @@ class GUI:
                 menu_item = Gtk.MenuItem('Remove from playlist')
                 menu_item.connect("activate", self.del_pl)
                 menu.add(menu_item)
-            elif self.inFav == True:
+            elif self.inFav == True and loc == "scrollMore":
                 self.btn = Gtk.Buildable.get_name(widget)
                 menu_item = Gtk.MenuItem('Remove from Favourites')
                 menu_item.connect("activate", self.rem_fav)
@@ -1465,7 +1465,7 @@ class Setup:
 if __name__ == "__main__":
     qdict = {'0' : 'LOSSLESS', '1' : 'HIGH', '2' : 'LOW'}
     # Dev/Use mode
-    version = 'HTidal 0.1'
+    version = 'HTidal Beta 0.1'
     if os.path.exists('/home/daniel/GitRepos/htidal'):
         fdir = "/home/daniel/GitRepos/htidal/DEV_FILES/"
         print(fdir)

@@ -2059,8 +2059,8 @@
   <object class="GtkWindow" id="dlWin">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Download progress</property>
-    <property name="default_width">700</property>
-    <property name="default_height">450</property>
+    <property name="default_width">350</property>
+    <property name="default_height">225</property>
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>

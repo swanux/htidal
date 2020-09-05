@@ -15,6 +15,8 @@ Tidal client for Linux using tidalapi, Python3 and GTK3
     -> Search the whole Tidal database
     -> Get similar content (albums, artists, radio)
 
+**Note:** Currently the program is in active development, so for example the homescreen is far from ready and you may encounter some minor bugs.
+
 **Sources:**
 
 Tidal API: https://github.com/tamland/python-tidal
