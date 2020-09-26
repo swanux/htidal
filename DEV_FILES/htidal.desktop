@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=HTidal
-Comment=Tidal client
+Comment= Unofficial Tidal client
 Exec=/usr/share/htidal/htidal.py
 Icon=/usr/share/htidal/icons/htidal.png
 Terminal=false
