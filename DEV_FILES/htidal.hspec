@@ -10,7 +10,7 @@ email = dani@kolozsi.net
 pkgname = htidal
 pretty_name = HTidal
 licensev = 0
-version = 0.1.2
+version = 0.1.3
 section = 18
 priority = 0
 depends = ${misc:Depends}
@@ -28,8 +28,8 @@ build_deps = debhelper (>= 11)
 homepage = https://github.com/swanux/htidal
 
 [description]
-short = Tidal client for Linux using tidalapi, python and GTK3
-longue = Tidal client for Linux using tidalapi, python and GTK3
+short = Unofficial Tidal client for Linux using tidalapi, python and GTK3
+longue = Unofficial Tidal client for Linux using tidalapi, python and GTK3
 
 [misc]
 rules = 0

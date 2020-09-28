@@ -1,0 +1,11 @@
+Package: htidal
+Version: 0.1.3-1
+Architecture: amd64
+Maintainer: Dániel Kolozsi <dani@kolozsi.net>
+Installed-Size: 790
+Depends: python3:any (>= 3.2~), python3-gi, bash (>= 4.4-5), python3-tidalapi (>= 0.7), python3-srt, python3-gst-1.0, python3-dateutil (>= 2.8.1-4)
+Section: sound
+Priority: optional
+Homepage: <https://github.com/swanux/htidal>
+Description: Unofficial Tidal client for Linux using tidalapi, python and GTK3
+ Unofficial Tidal client for Linux using tidalapi, python and GTK3

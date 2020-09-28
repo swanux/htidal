@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/python3
 # -*- coding: utf-8 -*-
 
 import tidalapi, time, gettext, locale, keyring, gi, subprocess, re, sys, os, threading, urllib, srt, datetime, webbrowser, random, requests
