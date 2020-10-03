@@ -10,7 +10,7 @@ email = dani@kolozsi.net
 pkgname = htidal
 pretty_name = HTidal
 licensev = 0
-version = 0.1.3
+version = 0.1.4
 section = 18
 priority = 0
 depends = ${misc:Depends}
@@ -33,9 +33,9 @@ longue = Unofficial Tidal client for Linux using tidalapi, python and GTK3
 
 [misc]
 rules = 0
-min_pyver = 3.2
-postinst = 
-postrm = 
+min_pyver = 3.4
+postinst = ln -s /usr/share/htidal/htidal.sh /usr/bin/htidal || echo "No need for it"
+postrm = rm /usr/bin/htidal || echo "No need for it2"
 
 [changelog]
 target = bionic
@@ -48,5 +48,6 @@ program = icons/
 	db/
 	htidal.glade
 	htidal.py
+	htidal.sh
 entry = htidal.desktop
 

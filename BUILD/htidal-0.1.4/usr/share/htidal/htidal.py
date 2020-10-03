@@ -93,14 +93,14 @@ class GUI:
         self.allStore = Gtk.ListStore(str, int)
         self.storeAlbum = Gtk.ListStore(str, str, int)
         # Trees (forest?)
-        self.tree = Gtk.TreeView(self.storePlaylist)
+        self.tree = Gtk.TreeView.new_with_model(self.storePlaylist)
         self.tree.connect("row-activated", self.row_activated)
         self.tree.connect("button_press_event", self.mouse_click)
         self.tree.set_reorderable(True)
-        self.allTree = Gtk.TreeView(self.allStore)
+        self.allTree = Gtk.TreeView.new_with_model(self.allStore)
         self.allTree.connect("row-activated", self.all_row)
         self.allTree.connect("button_press_event", self.mouse_click)
-        self.albumTree = Gtk.TreeView(self.storeAlbum)
+        self.albumTree = Gtk.TreeView.new_with_model(self.storeAlbum)
         self.albumTree.connect("row-activated", self.album_row)
         self.albumTree.connect("button_press_event", self.mouse_click)
         # Scrolls (idk)
@@ -263,6 +263,24 @@ class GUI:
         self.constructor(self.boxList[2], self.query['albums'], 'album')
         self.constructor(self.boxList[3], self.query['playlists'], 'playlist')
         self.constructor(self.boxList[4], [self.query['top_hit']], 'top')
+    
+    def seClean(self):
+        if self.query['tracks'] == []:
+            for i in self.s_label:
+                if "track" in Gtk.Buildable.get_name(i):
+                    i.hide()
+        if self.query['artists'] == []:
+            for i in self.s_label:
+                if "artist" in Gtk.Buildable.get_name(i):
+                    i.hide()
+        if self.query['albums'] == []:
+            for i in self.s_label:
+                if "album" in Gtk.Buildable.get_name(i):
+                    i.hide()
+        if self.query['playlists'] == []:
+            for i in self.s_label:
+                if "playlist" in Gtk.Buildable.get_name(i):
+                    i.hide()
 
     def on_searcher_search_changed(self, widget):
         txt = widget.get_text()
@@ -279,8 +297,9 @@ class GUI:
             qld.submit(self.backer)
             time.sleep(0.1)
             window.show_all()
+            self.seClean()
 
-    def cleaner(slef, lis):
+    def cleaner(self, lis):
         if lis == []:
             pass
         else:
@@ -289,48 +308,51 @@ class GUI:
 
     def constructor(self, targetParent, items, btn):
         self.inFav = False
-        moreBox = Gtk.Box.new(1, 10)
-        moreBox.set_homogeneous(True)
-        zed = 0
-        for item in items:
-            subBox = Gtk.Box.new(0, 10)
-            namBut = Gtk.Button.new_with_label("test")
-            tmpLab = namBut.get_child()
-            tmpLab.set_ellipsize(3)
-            tmpLab.set_markup('<big><b>'+item.name.replace('&', '')+'</b></big>')
-            tmpLab.set_alignment(0, 0.5)
-            namBut.set_relief(Gtk.ReliefStyle.NONE)
-            iType = "general"
-            if btn == 'otAlBut':
-                Gtk.Buildable.set_name(namBut, f"s_album{zed}")
-            elif btn == 'track':
-                Gtk.Buildable.set_name(namBut, f"s_track{zed}")
-            elif btn == 'album':
-                Gtk.Buildable.set_name(namBut, f"s_album{zed}")
-            elif btn == 'artist':
-                Gtk.Buildable.set_name(namBut, f"s_art{zed}")
-            elif btn == 'playlist':
-                Gtk.Buildable.set_name(namBut, f"s_playl{zed}")
-            elif btn == 'top':
-                Gtk.Buildable.set_name(namBut, f"s_top")
-                iType = self.get_type(item)
-            else:
-                Gtk.Buildable.set_name(namBut, f"s_art{zed}")
-            namBut.connect("clicked", self.on_searchItem_clicked)
-            namBut.connect("button_press_event", self.mouse_click)
-            imaje = Gtk.Image.new()
-            imaje.set_padding(10, 10)
-            subBox.pack_start(imaje, False, False, 0)
-            subBox.pack_end(namBut, True, True, 0)
-            moreBox.pack_end(subBox, True, True, 0)
-            ld_cov = futures.ThreadPoolExecutor(max_workers=2)
-            if btn == 'track' or iType == 'track':
-                ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item.album)
-            else:
-                ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item)
-            zed += 1
-        targetParent.pack_start(moreBox, True, True, 0)
-        moreBox.show_all()
+        if items == []:
+            print(f'Not in this category {btn}')
+        else:
+            moreBox = Gtk.Box.new(1, 10)
+            moreBox.set_homogeneous(True)
+            zed = 0
+            for item in items:
+                subBox = Gtk.Box.new(0, 10)
+                namBut = Gtk.Button.new_with_label("test")
+                tmpLab = namBut.get_child()
+                tmpLab.set_ellipsize(3)
+                tmpLab.set_markup('<big><b>'+item.name.replace('&', '')+'</b></big>')
+                tmpLab.set_alignment(0, 0.5)
+                namBut.set_relief(Gtk.ReliefStyle.NONE)
+                iType = "general"
+                if btn == 'otAlBut':
+                    Gtk.Buildable.set_name(namBut, f"s_album{zed}")
+                elif btn == 'track':
+                    Gtk.Buildable.set_name(namBut, f"s_track{zed}")
+                elif btn == 'album':
+                    Gtk.Buildable.set_name(namBut, f"s_album{zed}")
+                elif btn == 'artist':
+                    Gtk.Buildable.set_name(namBut, f"s_art{zed}")
+                elif btn == 'playlist':
+                    Gtk.Buildable.set_name(namBut, f"s_playl{zed}")
+                elif btn == 'top':
+                    Gtk.Buildable.set_name(namBut, f"s_top")
+                    iType = self.get_type(item)
+                else:
+                    Gtk.Buildable.set_name(namBut, f"s_art{zed}")
+                namBut.connect("clicked", self.on_searchItem_clicked)
+                namBut.connect("button_press_event", self.mouse_click)
+                imaje = Gtk.Image.new()
+                imaje.set_padding(10, 10)
+                subBox.pack_start(imaje, False, False, 0)
+                subBox.pack_end(namBut, True, True, 0)
+                moreBox.pack_end(subBox, True, True, 0)
+                ld_cov = futures.ThreadPoolExecutor(max_workers=2)
+                if btn == 'track' or iType == 'track':
+                    ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item.album)
+                else:
+                    ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item)
+                zed += 1
+            targetParent.pack_start(moreBox, True, True, 0)
+            moreBox.show_all()
 
     def on_go_more(self, button):
         self.cleaner(self.boxMore.get_children())
@@ -617,9 +639,13 @@ class GUI:
         tg = GLib.idle_add(self.label3.set_label, simpl3)
         # GLib.source_remove(tg)
         done = ""
-        tmpline = self.line1[1:]
+        tmpline = self.line1[:]
         first = True
-        for xy in self.line1:
+        tl1 = self.line1
+        tl1.insert(0, "")
+        it = 1
+        maxit = len(tl1)-1
+        for xy in tl1:
             # if self.position <= xy.end.total_seconds():
             #     self.seekingLyr = False
             if self.stopKar or self.seekBack:
@@ -634,15 +660,28 @@ class GUI:
                     break
                 leftover += '%s ' % y.content.replace('#', '')
             # if not self.seekingLyr:
-            tg = GLib.idle_add(self.label1.set_markup, "<span color='green'>%s</span> <span color='green'>%s</span> <span color='white'>%s</span>" % (done, xy.content.replace('#', ''), leftover))
+            try:
+                tg = GLib.idle_add(self.label1.set_markup, "<span color='green'>%s</span> <span color='green'>%s</span> <span color='white'>%s</span>" % (done, xy.content.replace('#', ''), leftover))
+            except:
+                print('Null')
+                tg = GLib.idle_add(self.label1.set_markup, "<span color='green'>%s</span> <span color='green'>%s</span> <span color='white'>%s</span>" % (done, xy, leftover))
             # GLib.source_remove(tg)
             while not self.stopKar:
                 time.sleep(0.01)
-                if self.position >= xy.end.total_seconds()-0.12 and self.position >= 0.5:
-                    break
+                if it > maxit:
+                    if self.position >= xy.end.total_seconds()-0.05 and self.position >= 0.5:
+                        break
+                else:
+                    xz = tl1[it]
+                    if self.position >= xz.start.total_seconds()-0.1 and self.position >= 0.5:
+                        break
                 if self.seekBack:
                     break
-            done += '%s ' % xy.content.replace('#', '')
+            it += 1
+            try:
+                done += '%s ' % xy.content.replace('#', '')
+            except:
+                print('First word')
 
     def slideShow(self, subtitle):
         self.lenlist = len(subtitle)-1
@@ -784,14 +823,18 @@ class GUI:
                 path,col,cellx,celly = pthinfo
                 self.albumTree.grab_focus()
                 self.albumTree.set_cursor(path,col,0)
-                menu_item = Gtk.MenuItem('Remove from playlist')
+                menu_item = Gtk.MenuItem.new_with_label('Remove from playlist')
                 menu_item.connect("activate", self.del_pl)
                 menu.add(menu_item)
+                menu.show_all()
+                menu.popup_at_pointer()
             elif self.inFav == True and loc == "scrollMore":
                 self.btn = Gtk.Buildable.get_name(widget)
-                menu_item = Gtk.MenuItem('Remove from Favourites')
+                menu_item = Gtk.MenuItem.new_with_label('Remove from Favourites')
                 menu_item.connect("activate", self.rem_fav)
                 menu.add(menu_item)
+                menu.show_all()
+                menu.popup_at_pointer()
             elif loc == "scrollAlbum" and self.artist == '':
                 pthinfo = self.albumTree.get_path_at_pos(event.x, event.y)
                 path,col,cellx,celly = pthinfo
@@ -804,26 +847,30 @@ class GUI:
                         break
                     else:
                         state = 'Add to Favourites'
-                menu_item = Gtk.MenuItem(state)
+                menu_item = Gtk.MenuItem.new_with_label(state)
                 menu_item.connect("activate", self.add_cur)
                 menu.add(menu_item)
-                menu_item = Gtk.MenuItem('Add to playlist')
+                menu_item = Gtk.MenuItem.new_with_label('Add to playlist')
                 menu_item.connect("activate", self.add_pl)
                 menu.add(menu_item)
+                menu.show_all()
+                menu.popup_at_pointer()
             elif loc == "big":
                 pthinfo = self.allTree.get_path_at_pos(event.x, event.y)
                 path,col,cellx,celly = pthinfo
                 self.allTree.grab_focus()
                 self.allTree.set_cursor(path,col,0)
-                menu_item = Gtk.MenuItem('Delete playlist')
+                menu_item = Gtk.MenuItem.new_with_label('Delete playlist')
                 menu_item.connect("activate", self.del_pyl)
                 menu.add(menu_item)
+                menu.show_all()
+                menu.popup_at_pointer()
             elif loc == "expanded":
                 pthinfo = self.tree.get_path_at_pos(event.x, event.y)
                 path,col,cellx,celly = pthinfo
                 self.tree.grab_focus()
                 self.tree.set_cursor(path,col,0)
-                menu_item = Gtk.MenuItem('Delete from current playqueue')
+                menu_item = Gtk.MenuItem.new_with_label('Delete from current playqueue')
                 menu_item.connect("activate", self.del_cur)
                 menu.add(menu_item)
                 this = self.tree.get_selection().get_selected_rows()[1][0][0]
@@ -833,17 +880,17 @@ class GUI:
                         break
                     else:
                         state = 'Add to Favourites'
-                menu_item = Gtk.MenuItem(state)
+                menu_item = Gtk.MenuItem.new_with_label(state)
                 menu_item.connect("activate", self.add_cur)
                 menu.add(menu_item)
-                menu_item = Gtk.MenuItem('Save current playqueue offline')
+                menu_item = Gtk.MenuItem.new_with_label('Save current playqueue offline')
                 menu_item.connect("activate", self.dl_cur)
                 menu.add(menu_item)
-                menu_item = Gtk.MenuItem('Add to playlist')
+                menu_item = Gtk.MenuItem.new_with_label('Add to playlist')
                 menu_item.connect("activate", self.add_pl)
                 menu.add(menu_item)
-            menu.show_all()
-            menu.popup_at_pointer()
+                menu.show_all()
+                menu.popup_at_pointer()
     
     def del_pyl(self, itme):
         this = self.allTree.get_selection().get_selected_rows()[1][0][0]
@@ -854,7 +901,7 @@ class GUI:
 
     def add_pl(self, item):
         self.prevTmp = stack.get_visible_child()
-        loc = Gtk.Buildable.get_name(widget)
+        loc = Gtk.Buildable.get_name(self.prevTmp)
         if loc == "expanded":
             this = self.tree.get_selection().get_selected_rows()[1][0][0]
             self.whatToAdd = self.playlist[self.storePlaylist[this][2]]
@@ -878,7 +925,7 @@ class GUI:
         self.gen_playlist_view(name='playlistPlayer', again=self.playlistPlayer, allPos='regen')
     
     def dl_cur(self, item):
-        now = datetime.now()
+        now = datetime.datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
         dl = futures.ThreadPoolExecutor(max_workers=2)
         dl.submit(self.general_download, items=self.playlist, tpe='playqueue', name=f"Playqueue_{str(dt_string).replace('.', '-').replace(' ', '_')}")
@@ -1096,9 +1143,15 @@ class GUI:
             elif allPos == 'radio':
                 self.relPos = 0
                 if self.get_type(playlistLoc) == 'artist':
-                    self.playlist = playlistLoc.get_radio()
+                    try:
+                        self.playlist = playlistLoc.get_radio()
+                    except:
+                        print('No radio station avilable')
                 else:
-                    self.playlist = playlistLoc.artist.get_radio()
+                    try:
+                        self.playlist = playlistLoc.artist.get_radio()
+                    except:
+                        print('No radio station avilable')
                     self.playlist.insert(0, playlistLoc)
             else:
                 print('Passing in generator')
@@ -1175,10 +1228,12 @@ class GUI:
             self.builder.get_object("otArBut").show()
             if allPos == 'artistLoad':
                 albumLoc = playlistLoc.get_top_tracks()
+                self.albumTracks = albumLoc
                 self.artiste = True
             elif playlistLoc == "myList":
                 self.artiste = False
                 albumLoc = self.allPlaylist[allPos].tracks()
+                self.albumTracks = albumLoc
             else:
                 self.artiste = False
                 albumLoc = playlistLoc.tracks()
@@ -1447,9 +1502,8 @@ class Setup:
         kmode5 = keyring.backends.kwallet.DBusKeyring()
         gmode = keyring.backends.SecretService.Keyring()
         DE = self.get_desktop_environment()
-        if "cinnamon" in DE or "gnome" in DE or "xfce" in DE or "lxde" in DE or "mate" in DE or "ubuntu" in DE or "elementary" in DE or "budgie" in DE or "unity" in DE:
-            keyring.set_keyring(gmode)
-        elif "kde" in DE or "qt" in DE:
+        # if "cinnamon" in DE or "gnome" in DE or "xfce" in DE or "lxde" in DE or "mate" in DE or "ubuntu" in DE or "elementary" in DE or "budgie" in DE or "unity" in DE:
+        if "kde" in DE or "qt" in DE:
             kver = os.popen("plasma-desktop --version").read()
             kver = kver.split("\n")
             kver = kver[2].replace("Plasma Desktop Shell: ", "")
@@ -1459,14 +1513,15 @@ class Setup:
             else:
                 keyring.set_keyring(kmode5)
         else:
-            print("Unsupported DE (needed for keyring).")
-            raise SystemExit
+            keyring.set_keyring(gmode)
+            # print("Unsupported DE (needed for keyring).")
+            # raise SystemExit
 
 
 if __name__ == "__main__":
     qdict = {'0' : 'LOSSLESS', '1' : 'HIGH', '2' : 'LOW'}
     # Dev/Use mode
-    version = 'HTidal Beta 0.1'
+    version = 'HTidal Beta 0.1 Snapshot 4'
     if os.path.exists('/home/daniel/GitRepos/htidal'):
         fdir = "/home/daniel/GitRepos/htidal/DEV_FILES/"
         print(fdir)

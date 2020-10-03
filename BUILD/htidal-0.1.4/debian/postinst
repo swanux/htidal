@@ -1,0 +1,4 @@
+#!/bin/bash +e
+
+ln -s /usr/share/htidal/htidal.sh /usr/bin/htidal || echo "No need for it"
+#DEBHELPER#

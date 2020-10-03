@@ -25,7 +25,7 @@ GTK3: https://www.gtk.org
 
 htidal_db: https://github.com/swanux/htidal_db
 
-Logog design by Seh
+Logo design by Seh
 
 ## Feedbacks
 Did you find any bugs? Do you have some feature requests/new ideas? Or just some questions? Feel free to provide your feedback using [hsuite](https://github.com/swanux/hsuite) or my [website](https://swanux.github.io/feedbacks.html).

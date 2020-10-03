@@ -3,5 +3,5 @@ set -e
 
 if [ "$1" = rtupdate ]; then
 	py3clean -p htidal /usr/share/htidal
-	py3compile -p htidal -V 3.2- /usr/share/htidal
+	py3compile -p htidal -V 3.4- /usr/share/htidal
 fi
