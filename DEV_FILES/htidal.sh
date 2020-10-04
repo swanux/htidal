@@ -1,3 +1,3 @@
 #!/bin/sh +e
 
-/usr/share/htidal/htidal.py
+/usr/share/htidal/HTidal.py
