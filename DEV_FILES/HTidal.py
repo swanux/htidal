@@ -354,6 +354,10 @@ class GUI:
             targetParent.pack_start(moreBox, True, True, 0)
             moreBox.show_all()
 
+    def on_git_link_clicked(self, button):
+        # open project page in browser
+        webbrowser.open_new("https://swanux.github.io/htidal.html")
+
     def on_go_more(self, button):
         self.cleaner(self.boxMore.get_children())
         btn = Gtk.Buildable.get_name(button)
@@ -414,14 +418,10 @@ class GUI:
         self.dlWin.show_all()
 
     def on_dload_activate(self, widget):
-        # self.general_download(items=[self.playlist[self.tnum]], tpe='track')
         dl = futures.ThreadPoolExecutor(max_workers=2)
         dl.submit(self.general_download, items=[self.playlist[self.tnum]], tpe='track')
         self.dlStack.set_visible_child(self.dlBox)
         self.dlWin.show_all()
-    
-    # def updator(self, i, lens):
-    #     GLib.idle_add(self.whLab1.set_label, f"{i} out of {lens}")
 
     def general_download(self, items, tpe, name=''): # FIXME
         dlDir = {}
@@ -796,7 +796,8 @@ class GUI:
         if 's_track' in self.btn:
             item = self.query['tracks'][int(re.findall(r'\d+', self.btn)[0])]
             self.favourite.remove_track(item.id)
-            self.favs = self.favourite.tracks()
+            # self.favs = self.favourite.tracks()
+            self.favs.remove(item)
             self.on_fav_gen("track")
         elif 's_art' in self.btn:
             item = self.query['artists'][int(re.findall(r'\d+', self.btn)[0])]
@@ -916,6 +917,7 @@ class GUI:
         local = tidalapi.playlist.UserPlaylist(self.session, self.album.id)
         local.remove_by_index(this)
         self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+        # self.album.remove(self.album[self.storeAlbum[this][2]])
         self.album = self.allPlaylist[self.allPos]
         self.gen_playlist_view(name='album', playlistLoc="myList", again=self.albume, allPos=self.allPos)
 
@@ -1502,7 +1504,6 @@ class Setup:
         kmode5 = keyring.backends.kwallet.DBusKeyring()
         gmode = keyring.backends.SecretService.Keyring()
         DE = self.get_desktop_environment()
-        # if "cinnamon" in DE or "gnome" in DE or "xfce" in DE or "lxde" in DE or "mate" in DE or "ubuntu" in DE or "elementary" in DE or "budgie" in DE or "unity" in DE:
         if "kde" in DE or "qt" in DE:
             kver = os.popen("plasma-desktop --version").read()
             kver = kver.split("\n")
@@ -1514,8 +1515,6 @@ class Setup:
                 keyring.set_keyring(kmode5)
         else:
             keyring.set_keyring(gmode)
-            # print("Unsupported DE (needed for keyring).")
-            # raise SystemExit
 
 
 if __name__ == "__main__":

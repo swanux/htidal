@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkImage" id="add">
@@ -176,7 +176,7 @@
   <object class="GtkImage" id="settings">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">preferences-desktop</property>
+    <property name="icon_name">dialog-information</property>
     <property name="use_fallback">True</property>
   </object>
   <object class="GtkImage" id="shuff">
@@ -533,117 +533,314 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkBox" id="set_box">
+                          <object class="GtkNotebook" id="ab_book">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_top">10</property>
-                            <property name="margin_bottom">10</property>
-                            <property name="hexpand">True</property>
-                            <property name="vexpand">True</property>
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">10</property>
+                            <property name="can_focus">True</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
                             <child>
-                              <object class="GtkGrid" id="set_grid">
+                              <object class="GtkBox" id="ab_box1">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="row_spacing">20</property>
-                                <property name="column_spacing">5</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkImage" id="logo">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="pixbuf">icons/htidal.png</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="nam_txt">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">10</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="label">HTidal Beta</property>
+                                    <attributes>
+                                      <attribute name="weight" value="ultrabold"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="ab_txt">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">v0.1 | Snapshot 4
+
+HTidal is an unofficial Tidal client for Linux which is completely opensource. It's really close to the official Tidal application, but with a few differences:
+	- It's not modern looking (It makes it more efficient but also less pleasant)
+	- It supports Linux (The web app is a bit picky with the browser support and it doesn't support offline mode and it's also less convenient, so I don't count it)
+	- It's opensource (which also means that it can have extra functions based on the developer's / modifier's needs)
+	- It perfectly fits into your Linux desktop (it uses GTK, Python and your local keyring)</property>
+                                    <property name="justify">center</property>
+                                    <property name="wrap">True</property>
+                                    <attributes>
+                                      <attribute name="style" value="normal"/>
+                                      <attribute name="weight" value="medium"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="git_link">
+                                    <property name="label">gtk-dialog-info</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="margin_top">20</property>
+                                    <property name="margin_bottom">10</property>
+                                    <property name="relief">none</property>
+                                    <property name="use_stock">True</property>
+                                    <property name="image_position">top</property>
+                                    <property name="always_show_image">True</property>
+                                    <signal name="clicked" handler="on_git_link_clicked" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="cop_txt">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">20</property>
+                                    <property name="label">© 2018 - 2020 Dániel Kolozsi (@Swanux)</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                            <child type="tab">
+                              <object class="GtkLabel" id="ab_but">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">True</property>
+                                <property name="label" translatable="yes">About</property>
+                                <property name="justify">fill</property>
+                              </object>
+                              <packing>
+                                <property name="tab_expand">True</property>
+                                <property name="tab_fill">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkBox" id="set_box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="margin_top">10</property>
+                                <property name="margin_bottom">10</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">True</property>
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">10</property>
+                                <child>
+                                  <object class="GtkGrid" id="set_grid">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="row_spacing">20</property>
+                                    <property name="column_spacing">5</property>
+                                    <property name="row_homogeneous">True</property>
+                                    <property name="column_homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkButton" id="wr_but">
+                                        <property name="label" translatable="yes">Writer out config</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <signal name="clicked" handler="on_wr_but_clicked" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBoxText" id="qual_combo">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <items>
+                                          <item id="0" translatable="yes">Lossless</item>
+                                          <item id="1" translatable="yes">High</item>
+                                          <item id="2" translatable="yes">Low</item>
+                                        </items>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="signOut">
+                                        <property name="label" translatable="yes">Sign out</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <property name="image">exit</property>
+                                        <property name="always_show_image">True</property>
+                                        <signal name="clicked" handler="on_signOut_clicked" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="wr_lab">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <property name="label" translatable="yes">Changes will take effect after app restart</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="qual_lab">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <property name="label" translatable="yes">Quality :</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="em_lab">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <property name="label" translatable="yes">email Here</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="fb">
+                                        <property name="label" translatable="yes">Provide Feedback</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <signal name="clicked" handler="on_fb_clicked" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="fb_lab">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="vexpand">True</property>
+                                        <property name="label" translatable="yes">Did you find bugs, have an idea or a question? Visit my website.</property>
+                                        <property name="justify">center</property>
+                                        <property name="wrap">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">3</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child type="tab">
+                              <object class="GtkLabel" id="st_tab">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">True</property>
+                                <property name="label" translatable="yes">Settings</property>
+                                <property name="justify">fill</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                                <property name="tab_fill">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkGrid" id="cr_grid">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="row_homogeneous">True</property>
                                 <property name="column_homogeneous">True</property>
                                 <child>
-                                  <object class="GtkButton" id="wr_but">
-                                    <property name="label" translatable="yes">Writer out config</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">end</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <signal name="clicked" handler="on_wr_but_clicked" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkComboBoxText" id="qual_combo">
+                                  <object class="GtkLabel" id="dev_lab">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <items>
-                                      <item id="0" translatable="yes">Lossless</item>
-                                      <item id="1" translatable="yes">High</item>
-                                      <item id="2" translatable="yes">Low</item>
-                                    </items>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="signOut">
-                                    <property name="label" translatable="yes">Sign out</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <property name="image">exit</property>
-                                    <property name="always_show_image">True</property>
-                                    <signal name="clicked" handler="on_signOut_clicked" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="wr_lab">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">end</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <property name="label" translatable="yes">Changes will take effect after app restart</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="qual_lab">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <property name="label" translatable="yes">Quality :</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="em_lab">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <property name="label" translatable="yes">email Here</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label" translatable="yes">Developed by :</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -651,43 +848,177 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="fb">
-                                    <property name="label" translatable="yes">Provide Feedback</property>
+                                  <object class="GtkLabel" id="art_lab">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <signal name="clicked" handler="on_fb_clicked" swapped="no"/>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label" translatable="yes">Artwork by :</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="trans_lab">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label" translatable="yes">Translation by :</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="fet_lab">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label" translatable="yes">Features by :</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
                                     <property name="top_attach">3</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="fb_lab">
+                                  <object class="GtkLabel" id="dev_lab1">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">end</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <property name="label" translatable="yes">Did you find bugs, have an idea or a question? Visit my website.</property>
-                                    <property name="wrap">True</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label">Swanux</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">0</property>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="dev_lab2">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label">Seh</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="dev_lab3">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label" translatable="yes" comments="The name of translator (you)">Swanux</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="dev_lab4">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="margin_bottom">5</property>
+                                    <property name="label">Swanux</property>
+                                    <attributes>
+                                      <attribute name="weight" value="medium"/>
+                                      <attribute name="scale" value="1.1000000000000001"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
                                     <property name="top_attach">3</property>
                                   </packing>
                                 </child>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child type="tab">
+                              <object class="GtkLabel" id="cr_but">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">True</property>
+                                <property name="label" translatable="yes">Credits</property>
+                              </object>
+                              <packing>
+                                <property name="position">2</property>
+                                <property name="tab_expand">True</property>
+                                <property name="tab_fill">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="lic_lab">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label">HTidal is free software; you can redistribute
+it and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or any later version.
+
+HTidal is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details. You should have
+received a copy of the GNU General Public License along with HSuite;
+if not, write to the Free Software Foundation, Inc., 59 Temple Place,
+Suite 330, Boston, MA  02111-1307  USA</property>
+                                <property name="justify">center</property>
+                              </object>
+                              <packing>
                                 <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child type="tab">
+                              <object class="GtkLabel" id="lc_but">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">True</property>
+                                <property name="label" translatable="yes">License</property>
+                              </object>
+                              <packing>
+                                <property name="position">3</property>
+                                <property name="tab_expand">True</property>
+                                <property name="tab_fill">False</property>
                               </packing>
                             </child>
                           </object>
@@ -740,6 +1071,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkBox" id="bott_box">
+                                    <property name="width_request">195</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="vexpand">True</property>
@@ -871,7 +1203,10 @@
                                             <property name="can_focus">False</property>
                                             <property name="margin_top">10</property>
                                             <property name="label" translatable="yes">Artist/Album Name</property>
-                                            <property name="ellipsize">end</property>
+                                            <property name="justify">center</property>
+                                            <property name="wrap">True</property>
+                                            <property name="width_chars">25</property>
+                                            <property name="max_width_chars">25</property>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
@@ -883,7 +1218,6 @@
                                           <object class="GtkScrolledWindow" id="bios">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="vexpand">True</property>
                                             <property name="shadow_type">in</property>
                                             <child>
                                               <object class="GtkViewport" id="biov">
@@ -945,6 +1279,7 @@
                                   <object class="GtkBox" id="general_top">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="margin_right">20</property>
                                     <property name="hexpand">True</property>
                                     <property name="vexpand">True</property>
                                     <property name="orientation">vertical</property>
@@ -986,7 +1321,6 @@
                                     <property name="can_focus">False</property>
                                     <property name="valign">end</property>
                                     <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
                                     <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkLabel" id="extra_label">
