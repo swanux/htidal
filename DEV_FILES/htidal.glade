@@ -710,6 +710,10 @@
                                   <object class="GtkImage" id="logo">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="margin_left">5</property>
+                                    <property name="margin_right">5</property>
+                                    <property name="margin_top">10</property>
+                                    <property name="margin_bottom">5</property>
                                     <property name="pixbuf">icons/htidal.png</property>
                                   </object>
                                   <packing>
@@ -2724,6 +2728,7 @@ It's essential to make sure we don't send too many requests to Tidal servers.</p
                         <property name="margin_bottom">10</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
+                        <property name="relief">none</property>
                         <signal name="clicked" handler="on_req_clicked" swapped="no"/>
                       </object>
                       <packing>

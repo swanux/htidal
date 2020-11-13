@@ -1329,6 +1329,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                     <property name="can_focus">False</property>
                                     <property name="valign">end</property>
                                     <property name="hexpand">True</property>
+                                    <property name="vexpand">False</property>
                                     <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkLabel" id="extra_label">
@@ -2723,6 +2724,7 @@ It's essential to make sure we don't send too many requests to Tidal servers.</p
                         <property name="margin_bottom">10</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
+                        <property name="relief">none</property>
                         <signal name="clicked" handler="on_req_clicked" swapped="no"/>
                       </object>
                       <packing>
