@@ -117,6 +117,7 @@ class GUI:
         self.albumBox = self.builder.get_object("general_top")
         self.album_scroll = Gtk.ScrolledWindow()
         self.album_scroll.set_vexpand(True)
+        self.albumTree.set_vexpand(True)
         self.album_scroll.add(self.albumTree)
         self.albumBox.pack_end(self.album_scroll, True, True, 0)
         # END
@@ -938,13 +939,7 @@ class GUI:
 
     def add_pl(self, item):
         self.prevTmp = stack.get_visible_child()
-        loc = Gtk.Buildable.get_name(self.prevTmp)
-        if loc == "expanded":
-            this = self.tree.get_selection().get_selected_rows()[1][0][0]
-            self.whatToAdd = self.playlist[self.storePlaylist[this][2]]
-        elif loc == "scrollAlbum":
-            this = self.albumTree.get_selection().get_selected_rows()[1][0][0]
-            self.whatToAdd = self.albumTracks[self.storeAlbum[this][2]]
+        self.whatToAdd = self.playlist[self.tnum]
         self.adding = True
         self.on_myLists_clicked('')
 

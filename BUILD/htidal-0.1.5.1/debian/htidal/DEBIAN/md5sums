@@ -1,7 +1,7 @@
 fbaec3d2091132974493e6110ed759d2  usr/share/applications/htidal.desktop
-075292807af06dae9c8bf3488dd031e0  usr/share/doc/htidal/changelog.Debian.gz
+3b6601bad78f2c4eee0662fe9a32d31c  usr/share/doc/htidal/changelog.Debian.gz
 58db3cfce37f04d3ba28cffd1e6d0a55  usr/share/doc/htidal/copyright
-4d6805ec60cc17792f597652b380c45d  usr/share/htidal/HTidal.py
+fd5798e42a1151c67cb1ca094327cb06  usr/share/htidal/HTidal.py
 ce70876712edcd9eba559bc415bf5a0f  usr/share/htidal/db/A_Night_Like_This-13036301.srt
 d6e6c362b166e9eddc2a8e9c080e9fc1  usr/share/htidal/db/Absolutely_Me-13432691.srt
 88e895abd673e5d4a5fff3b2e24ac457  usr/share/htidal/db/All_That_She_Wants-14688003.srt
@@ -52,7 +52,7 @@ a2a894dae7f877a509e40a31eb5f3c87  usr/share/htidal/db/Told_My_Ma-5485002.srt
 4c4d05e04a07108127df75ef78ee19aa  usr/share/htidal/db/Voulez-Vous-1771757.srt
 75bfab83e7be4c4419abf1661601797e  usr/share/htidal/db/Whatchugot-71073766.srt
 4b1139850a39994e9be9dbd7cad9a4be  usr/share/htidal/db/Would_I_Lie_to_You?_Remastered_Version-26883.srt
-62d12d22dd3355d426dd4ce79ce1a72b  usr/share/htidal/htidal.glade
+b8d58032f460a2e723569f0ed0dc2050  usr/share/htidal/htidal.glade
 e9e7c83ecc4d3cbacd575ea1f7040488  usr/share/htidal/htidal.sh
 dfd8ffbb78bd23610f01377584ba2391  usr/share/htidal/icons/htidal.png
 6a5c5accad60f21f31bf2a11ceb4f9c2  usr/share/python3/runtime.d/htidal.rtupdate

@@ -1,4 +1,4 @@
-htidal (0.1.5-1) bionic; urgency=medium
+htidal (0.1.5.1-1) bionic; urgency=medium
 
   * Fixed minor bugs
   * Added new about section
@@ -6,4 +6,4 @@ htidal (0.1.5-1) bionic; urgency=medium
   * Updated depracted code
   * Added play option to artist top/album/playlist views
 
- -- Dániel Kolozsi <dani@kolozsi.net>  Fri, 13 Nov 2020 13:45:46 +0100
+ -- Dániel Kolozsi <dani@kolozsi.net>  Fri, 13 Nov 2020 17:23:16 +0100

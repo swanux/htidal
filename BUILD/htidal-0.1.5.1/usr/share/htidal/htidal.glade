@@ -1282,7 +1282,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                 <property name="hexpand">True</property>
                                 <property name="vexpand">True</property>
                                 <property name="orientation">vertical</property>
-                                <property name="homogeneous">True</property>
+                                <property name="spacing">20</property>
                                 <child>
                                   <object class="GtkBox" id="general_top">
                                     <property name="visible">True</property>
@@ -1318,7 +1318,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="expand">False</property>
+                                    <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
@@ -1329,6 +1329,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                     <property name="can_focus">False</property>
                                     <property name="valign">end</property>
                                     <property name="hexpand">True</property>
+                                    <property name="vexpand">False</property>
                                     <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkLabel" id="extra_label">
