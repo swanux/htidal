@@ -10,7 +10,7 @@ email = dani@kolozsi.net
 pkgname = htidal
 pretty_name = HTidal
 licensev = 0
-version = 0.1.4
+version = 0.1.5
 section = 18
 priority = 0
 depends = ${misc:Depends}
@@ -40,14 +40,18 @@ postrm = rm /usr/bin/htidal || echo "No need for it2"
 [changelog]
 target = bionic
 urgency = 1
-changes = Initial release
+changes = Fixed minor bugs
+	Added new about section
+	Improved GUI usability
+	Updated depracted code
+	Added play option to artist top/album/playlist views
 
 [data]
 root = /home/daniel/GitRepos/htidal/DEV_FILES
 program = icons/
 	db/
 	htidal.glade
-	htidal.py
+	HTidal.py
 	htidal.sh
 entry = htidal.desktop
 

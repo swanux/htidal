@@ -58,16 +58,16 @@ class GUI:
         self.plaicon = self.builder.get_object("play")
         self.playbut = self.builder.get_object("playBut")
         self.slider = Gtk.HScale()
-        self.slider.set_margin_left(6)
-        self.slider.set_margin_right(6)
+        self.slider.set_margin_start(6)
+        self.slider.set_margin_end(6)
         self.slider.set_draw_value(False)
         self.slider.set_increments(1, 10)
         self.slider_handler_id = self.slider.connect("value-changed", self.on_slider_seek)
         self.box = self.builder.get_object("slidBox")
         self.box.pack_start(self.slider, True, True, 0)
         self.label = Gtk.Label(label='0:00')
-        self.label.set_margin_left(6)
-        self.label.set_margin_right(6)
+        self.label.set_margin_start(6)
+        self.label.set_margin_end(6)
         self.box.pack_start(self.label, False, False, 0)
         self.boxMore = self.builder.get_object("more_box")
         # Dload
@@ -320,7 +320,8 @@ class GUI:
                 tmpLab = namBut.get_child()
                 tmpLab.set_ellipsize(3)
                 tmpLab.set_markup('<big><b>'+item.name.replace('&', '')+'</b></big>')
-                tmpLab.set_alignment(0, 0.5)
+                tmpLab.set_halign(Gtk.Align(1))
+                tmpLab.set_valign(Gtk.Align(3))
                 namBut.set_relief(Gtk.ReliefStyle.NONE)
                 iType = "general"
                 if btn == 'otAlBut':
@@ -341,7 +342,10 @@ class GUI:
                 namBut.connect("clicked", self.on_searchItem_clicked)
                 namBut.connect("button_press_event", self.mouse_click)
                 imaje = Gtk.Image.new()
-                imaje.set_padding(10, 10)
+                imaje.set_margin_start(10)
+                imaje.set_margin_end(10)
+                imaje.set_margin_top(10)
+                imaje.set_margin_bottom(10)
                 subBox.pack_start(imaje, False, False, 0)
                 subBox.pack_end(namBut, True, True, 0)
                 moreBox.pack_end(subBox, True, True, 0)
@@ -495,12 +499,35 @@ class GUI:
         dbnow = os.listdir('/usr/share/htidal/db/')
         self.sub.set_title('%s - %s' % (track, artists[0].name))
         if '%s-%s.srt' % (track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', ''), tid) not in dbnow:
-            print("NEW NEEDED1")
-            self.builder.get_object('id').set_label('Track ID: %s' % tid)
-            self.subStack.set_visible_child(self.boxNo)
+            indices = [i for i, s in enumerate(dbnow) if '%s' % track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', '') in s]
+            if indices == []:
+                print("NEW NEEDED1")
+                self.builder.get_object('id').set_label('Track ID: %s' % tid)
+                self.subStack.set_visible_child(self.boxNo)
+            else:
+                print("PARTIAL")
+                x, y = window.get_position()
+                sx, sy = window.get_size()
+                dialogWindow = Gtk.MessageDialog(parent=window, modal=True, destroy_with_parent=True, message_type=Gtk.MessageType.QUESTION, buttons=Gtk.ButtonsType.YES_NO, text=_('The current track does not have synced lyrics. However there is one which might be similar: %s.\nWould you like to give it a try?' % dbnow[indices[0]]))
+                dialogWindow.set_title(_("Prompt"))
+                dsx, dsy = dialogWindow.get_size()
+                dialogWindow.move(x+((sx-dsx)/2), y+((sy-dsy)/2))
+                dx, dy = dialogWindow.get_position()
+                print(dx, dy)
+                dialogWindow.show_all()
+                res = dialogWindow.run()
+                if res == Gtk.ResponseType.YES:
+                    print('OK pressed')
+                    dialogWindow.destroy()
+                    self.start_karaoke(dbnow[indices[0]])
+                else:
+                    print('No pressed')
+                    dialogWindow.destroy()
+                    self.builder.get_object('id').set_label('Track ID: %s' % tid)
+                    self.subStack.set_visible_child(self.boxNo)
         else:
             print("FOUND")
-            self.start_karaoke(track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', ''), tid)
+            self.start_karaoke("%s-%s.srt" % (track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', ''), tid))
         self.sub.show_all()
 
     def on_hide(self, window, e):
@@ -564,9 +591,9 @@ class GUI:
         self.gen_playlist_view(name="all", again=self.all)
         stack.set_visible_child(self.builder.get_object('big'))
 
-    def start_karaoke(self, track, tid):
+    def start_karaoke(self, sfile):
         print('HEY')
-        with open ("/usr/share/htidal/db/%s-%s.srt" % (track, tid), "r") as subfile:
+        with open ("/usr/share/htidal/db/%s" % (sfile), "r") as subfile:
             presub = subfile.read()
         subtitle_gen = srt.parse(presub)
         subtitle = list(subtitle_gen)
@@ -747,6 +774,15 @@ class GUI:
     def row_activated(self, widget, row, col):
         self.relPos = self.tree.get_selection().get_selected_rows()[1][0][0]
         self.on_next("clickMode")
+    
+    def playIt(self, button):
+        self.relPos = 0
+        if self.artiste == False:
+            self.gen_playlist_view(name="playlistPlayer", again=self.playlistPlayer, allPos='albumLoad')
+        else:
+            self.gen_playlist_view(name="playlistPlayer", again=self.playlistPlayer, allPos='artistLoad')
+        print('submit3')
+        self.on_next("clickModeA")
     
     def album_row(self, widget, row, col):
         print('posAlb')
@@ -995,6 +1031,10 @@ class GUI:
         elif button == "clickModeA":
             self.tnum = self.storeAlbum[self.relPos][2] # pylint: disable=unsubscriptable-object
         else:
+            try:
+                self.albumTree.set_cursor(self.relPos)
+            except:
+                print('Out of length')
             self.tree.set_cursor(self.relPos)
             self.relPos = self.tree.get_selection().get_selected_rows()[1][0][0]
             self.relPos = self.relPos + 1
@@ -1014,6 +1054,10 @@ class GUI:
 
     def on_prev(self, button):
         print("Prev")
+        try:
+            self.albumTree.set_cursor(self.relPos)
+        except:
+            print('Out of length')
         self.tree.set_cursor(self.relPos)
         self.relPos = self.tree.get_selection().get_selected_rows()[1][0][0]
         self.relPos = self.relPos - 1
@@ -1088,6 +1132,7 @@ class GUI:
             tg = GLib.idle_add(widget.set_from_pixbuf, coverBuf)
 
     def on_expand_clicked(self, button):
+        self.tree.set_cursor(self.relPos)
         if self.expanded == False:
             print("expand")
             self.expanded = True
@@ -1096,6 +1141,10 @@ class GUI:
         else:
             self.expanded = False
             stack.set_visible_child(self.prevSlide)
+            try:
+                self.albumTree.set_cursor(self.relPos)
+            except:
+                print('Out of length')
     
     def on_back(self, button):
         print("Home")
@@ -1327,6 +1376,10 @@ class GUI:
         self.position = 0
         url = self.playlist[self.tnum].get_url()
         self.player.set_property("uri", url)
+        try:
+            self.albumTree.set_cursor(self.relPos)
+        except:
+            print('Out of length')
         self.tree.set_cursor(self.relPos)
         self.player.set_state(Gst.State.PLAYING)
         self.plaicon.set_from_icon_name("media-playback-pause", Gtk.IconSize.BUTTON)
@@ -1336,6 +1389,10 @@ class GUI:
     def resume(self):
         print("Resume")
         self.playing = True
+        try:
+            self.albumTree.set_cursor(self.relPos)
+        except:
+            print('Out of length')
         self.tree.set_cursor(self.relPos)
         self.player.set_state(Gst.State.PLAYING)
         self.plaicon.set_from_icon_name("media-playback-pause", Gtk.IconSize.BUTTON)
@@ -1355,6 +1412,10 @@ class GUI:
     def pause(self): 
         print("Pause")
         self.playing = False
+        try:
+            self.albumTree.set_cursor(self.relPos)
+        except:
+            print('Out of length')
         self.tree.set_cursor(self.relPos)
         self.plaicon.set_from_icon_name("media-playback-start", Gtk.IconSize.BUTTON)
         self.player.set_state(Gst.State.PAUSED)
@@ -1520,7 +1581,7 @@ class Setup:
 if __name__ == "__main__":
     qdict = {'0' : 'LOSSLESS', '1' : 'HIGH', '2' : 'LOW'}
     # Dev/Use mode
-    version = 'HTidal Beta 0.1 Snapshot 4'
+    version = 'HTidal Beta 0.1 Snapshot 5'
     if os.path.exists('/home/daniel/GitRepos/htidal'):
         fdir = "/home/daniel/GitRepos/htidal/DEV_FILES/"
         print(fdir)
