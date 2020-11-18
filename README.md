@@ -8,7 +8,7 @@ Unofficial Tidal client for Linux using tidalapi, Python3 and GTK3
     -> Standard media controls (play, pause, next, previous, shuffle)
     -> Karaoke window Experimental (database is extremely small, you can submit requests)
     -> Sort playqueue by drag & drop, artist, title or ID
-    -> Download tracks, albums, playlists or playqueue (flac or m4a)
+    -> Download tracks, albums, playlists or playqueue (alac or m4a)
     -> Manage playlists (add/delete items, add/delete playlists)
     -> Manage favourites (add/delete items)
     -> Easy navigation with popovers between artists, albums and tracks

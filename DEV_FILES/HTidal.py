@@ -9,6 +9,7 @@ gi.require_version('Gst', '1.0')
 gi.require_version('Keybinder', '3.0')
 from gi.repository import Gtk, Gst, GLib, Gio, GdkPixbuf, Gdk
 from getpass import getpass
+from mediafile import MediaFile
 
 class GUI:
     def __init__(self):
@@ -32,7 +33,7 @@ class GUI:
         self.builder.get_object('em_lab').set_label(emailC)
         self.builder.get_object('qual_combo').set_active(int(qualityC))
         if qualityC == '0':
-            self.ftype = 'flac'
+            self.ftype = 'alac'
         else:
             self.ftype = 'm4a'
         self.allPlaylist = ''
@@ -176,7 +177,7 @@ class GUI:
                     self.resume()
                 except:
                     print("Resume error")
-            elif action == "Pause":
+            elif action == "Pause" or action == "Stop":
                 try:
                     self.pause()
                 except:
@@ -193,9 +194,9 @@ class GUI:
         x, y = window.get_position()
         # Get the size of the window
         sx, sy = window.get_size()
-        dialogWindow = Gtk.MessageDialog(parent=window, modal=True, destroy_with_parent=True, message_type=Gtk.MessageType.QUESTION, buttons=Gtk.ButtonsType.YES_NO, text=_('Do you really would like to exit now?'))
+        dialogWindow = Gtk.MessageDialog(parent=window, modal=True, destroy_with_parent=True, message_type=Gtk.MessageType.QUESTION, buttons=Gtk.ButtonsType.YES_NO, text=gg('Do you really would like to exit now?'))
         # set the title
-        dialogWindow.set_title(_("Prompt"))
+        dialogWindow.set_title(gg("Prompt"))
         dsx, dsy = dialogWindow.get_size()                          # get the dialogs size
         # Move it to the center of the main window
         dialogWindow.move(x+((sx-dsx)/2), y+((sy-dsy)/2))
@@ -206,7 +207,10 @@ class GUI:
         if res == Gtk.ResponseType.YES:                             # if yes ...
             print('OK pressed')
             dialogWindow.destroy()
-            self.mainloop.quit()
+            try:
+                self.mainloop.quit()
+            except:
+                pass
             self.force = True
             self.stopKar = True
             raise SystemExit
@@ -467,30 +471,30 @@ class GUI:
         self.dlStack.set_visible_child(self.dlBox)
         self.dlWin.show_all()
 
-    def general_download(self, items, tpe, name=''): # FIXME
+    def general_download(self, items, tpe, name=''):
         dlDir = {}
         self.tot_size = 0
         i = 1
         lens = len(items)
         for item in items:
-            # self.updator(i=i, lens=lens)
             GLib.idle_add(self.whLab1.set_label, f"{i} out of {lens}")
             time.sleep(1.5)
             url = item.get_url()
             tmp = urllib.request.urlopen(url)
-            file_name = item.name
+            file_name = item.id
+            track = item.name
             file_size = int(tmp.getheader('Content-Length'))
             if tpe == 'track':
-                target = f'/home/{user}/Music/htidal/tracks/{item.name}.{self.ftype}'
+                target = f'/home/{user}/Music/htidal/tracks/{track}.{self.ftype}'
             elif tpe == 'album':
-                target = f'/home/{user}/Music/htidal/albums/{name}/{item.name}.{self.ftype}'
+                target = f'/home/{user}/Music/htidal/albums/{name}/{track}.{self.ftype}'
             elif tpe == 'playlist':
-                target = f'/home/{user}/Music/htidal/playlists/{name}/{item.name}.{self.ftype}'
+                target = f'/home/{user}/Music/htidal/playlists/{name}/{track}.{self.ftype}'
             elif tpe == 'playqueue':
-                target = f'/home/{user}/Music/htidal/snapshots/{name}/{item.name}.{self.ftype}'
+                target = f'/home/{user}/Music/htidal/snapshots/{name}/{track}.{self.ftype}'
             # elif tpe == 'video':
-            #     target = f'/home/{user}/Music/htidal/videos/{item.name}.{self.ftype}'
-            dlDir[file_name] = {'size' : file_size, 'url' : url, 'target' : target.replace(' ', "\ ").replace('(', '').replace(')', '')}
+            #     target = f'/home/{user}/Music/htidal/videos/{track}.{self.ftype}'
+            dlDir[file_name] = {'size' : file_size, 'url' : url, 'track' : track, 'artist' : item.artist.name, 'album' : item.album.name, 'year' : item.tidal_release_date.strftime("%Y"), 'target' : target.replace(' ', "\ ").replace('(', '').replace(')', '')}
             self.tot_size += file_size
             i += 1
         print(dlDir)
@@ -529,6 +533,12 @@ class GUI:
                     self.dlded += len(buffer)
                     f.write(buffer)
                     GLib.idle_add(self.whLab.set_label, f"{round(self.dlded/1024/1024, 1)} MB downloaded of total {round(self.tot_size/1024/1024, 1)} MB")
+            f = MediaFile(target.replace('\\ ', ' '))
+            f.title = dlDir[current]['track']
+            f.album = dlDir[current]['album']
+            f.artist = dlDir[current]['artist']
+            f.year = dlDir[current]['year']
+            f.save()
 
     def on_karaoke_activate(self, widget):
         print('Karaoke')
@@ -537,19 +547,20 @@ class GUI:
         tid = self.playlist[self.tnum].id
         artists = self.playlist[self.tnum].artists
         dbnow = os.listdir('/usr/share/htidal/db/')
-        self.sub.set_title('%s - %s' % (track, artists[0].name))
-        if '%s-%s.srt' % (track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', ''), tid) not in dbnow:
-            indices = [i for i, s in enumerate(dbnow) if '%s' % track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', '') in s]
+        self.sub.set_title(f'{track} - {artists[0].name}')
+        tmp = track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', '')
+        if f"{tmp}-{tid}.srt" not in dbnow:
+            indices = [i for i, s in enumerate(dbnow) if f'{tmp}' in s]
             if indices == []:
                 print("NEW NEEDED1")
-                self.builder.get_object('id').set_label('Track ID: %s' % tid)
+                self.builder.get_object('id').set_label(f'Track ID: {tid}')
                 self.subStack.set_visible_child(self.boxNo)
             else:
                 print("PARTIAL")
                 x, y = window.get_position()
                 sx, sy = window.get_size()
-                dialogWindow = Gtk.MessageDialog(parent=window, modal=True, destroy_with_parent=True, message_type=Gtk.MessageType.QUESTION, buttons=Gtk.ButtonsType.YES_NO, text=_('The current track does not have synced lyrics. However there is one which might be similar: %s.\nWould you like to give it a try?' % dbnow[indices[0]]))
-                dialogWindow.set_title(_("Prompt"))
+                dialogWindow = Gtk.MessageDialog(parent=window, modal=True, destroy_with_parent=True, message_type=Gtk.MessageType.QUESTION, buttons=Gtk.ButtonsType.YES_NO, text=gg(f'The current track does not have synced lyrics. However there is one which might be similar: {dbnow[indices[0]]}.\nWould you like to give it a try?'))
+                dialogWindow.set_title(gg("Prompt"))
                 dsx, dsy = dialogWindow.get_size()
                 dialogWindow.move(x+((sx-dsx)/2), y+((sy-dsy)/2))
                 dx, dy = dialogWindow.get_position()
@@ -563,11 +574,11 @@ class GUI:
                 else:
                     print('No pressed')
                     dialogWindow.destroy()
-                    self.builder.get_object('id').set_label('Track ID: %s' % tid)
+                    self.builder.get_object('id').set_label(f'Track ID: {tid}')
                     self.subStack.set_visible_child(self.boxNo)
         else:
             print("FOUND")
-            self.start_karaoke("%s-%s.srt" % (track.replace(' ', '_').replace("'", '').replace('(', '').replace(')', ''), tid))
+            self.start_karaoke(f"{tmp}-{tid}.srt")
         self.sub.show_all()
 
     def on_hide(self, window, e):
@@ -582,7 +593,7 @@ class GUI:
 
     def on_signOut_clicked(self, button):
         self.session = tidalapi.Session(self.c)
-        os.system('rm /home/%s/.config/htidal.ini' % user)
+        os.system(f'rm /home/{user}/.config/htidal/htidal.ini')
         self.bigStack.set_visible_child(self.builder.get_object('loginBox'))
 
     def on_event1_button_press_event(self, event, button):
@@ -594,7 +605,7 @@ class GUI:
     def on_wr_but_clicked(self, button):
         nQuality = self.builder.get_object('qual_combo').get_active()
         parser.set('misc', 'quality', str(nQuality))
-        file = open("/home/%s/.config/htidal.ini" % user, "w+")
+        file = open(f"/home/{user}/.config/htidal/htidal.ini", "w+")
         parser.write(file)
         file.close()
 
@@ -633,7 +644,7 @@ class GUI:
 
     def start_karaoke(self, sfile):
         print('HEY')
-        with open ("/usr/share/htidal/db/%s" % (sfile), "r") as subfile:
+        with open (f"/usr/share/htidal/db/{sfile}", "r") as subfile:
             presub = subfile.read()
         subtitle_gen = srt.parse(presub)
         subtitle = list(subtitle_gen)
@@ -690,14 +701,14 @@ class GUI:
             for z in self.line2:
                 if self.stopKar or self.seekBack:
                     break
-                simpl2 += '%s ' % z.content.replace('#', '')
+                simpl2 += f"{z.content.replace('#', '')} "
         else:
             simpl2 = ""
         if self.line3 != []:
             for z in self.line3:
                 if self.stopKar or self.seekBack:
                     break
-                simpl3 += '%s ' % z.content.replace('#', '')
+                simpl3 += f"{z.content.replace('#', '')} "
         else:
             simpl3 = ""
         # if not self.seekingLyr:
@@ -725,13 +736,13 @@ class GUI:
             for y in tmpline:
                 if self.stopKar or self.seekBack:
                     break
-                leftover += '%s ' % y.content.replace('#', '')
+                leftover += f"{y.content.replace('#', '')} "
             # if not self.seekingLyr:
             try:
-                tg = GLib.idle_add(self.label1.set_markup, "<span color='green'>%s</span> <span color='green'>%s</span> <span color='white'>%s</span>" % (done, xy.content.replace('#', ''), leftover))
+                tg = GLib.idle_add(self.label1.set_markup, f"<span color='green'>{done}</span> <span color='green'>{xy.content.replace('#', '')}</span> <span color='white'>{leftover}</span>")
             except:
                 print('Null')
-                tg = GLib.idle_add(self.label1.set_markup, "<span color='green'>%s</span> <span color='green'>%s</span> <span color='white'>%s</span>" % (done, xy, leftover))
+                tg = GLib.idle_add(self.label1.set_markup, f"<span color='green'>{done}</span> <span color='green'>{xy}</span> <span color='white'>{leftover}</span>")
             # GLib.source_remove(tg)
             while not self.stopKar:
                 time.sleep(0.01)
@@ -746,7 +757,7 @@ class GUI:
                     break
             it += 1
             try:
-                done += '%s ' % xy.content.replace('#', '')
+                done += f"{xy.content.replace('#', '')} "
             except:
                 print('First word')
 
@@ -997,7 +1008,6 @@ class GUI:
         local = tidalapi.playlist.UserPlaylist(self.session, self.album.id)
         local.remove_by_index(this)
         self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
-        # self.album.remove(self.album[self.storeAlbum[this][2]])
         self.album = self.allPlaylist[self.allPos]
         self.gen_playlist_view(name='album', playlistLoc="myList", again=self.albume, allPos=self.allPos)
 
@@ -1215,7 +1225,7 @@ class GUI:
         elif t == Gst.MessageType.ERROR:
             self.player.set_state(Gst.State.NULL)
             err, debug = message.parse_error()
-            print ("Error: %s" % err, debug)
+            print (f"Error: {err}", debug)
 
     def on_shuffBut_clicked(self, button):
         self.gen_playlist_view(name='shuffle')
@@ -1486,7 +1496,7 @@ class GUI:
                 self.label.set_text ("%d" % (position / 60) + ":%02d" % (position % 60))
                 self.slider.handler_unblock(self.slider_handler_id)
         except Exception as e:
-            print ('W: %s' % e)
+            print (f'W: {e}')
             pass
         return True
     
@@ -1498,8 +1508,8 @@ class GUI:
         except:
             print('no internet')
             net = False
-            offtxt = _("You have no internet connection!")
-            os.system('zenity --warning --text=%s --ellipsize' % offtxt)
+            offtxt = gg("You have no internet connection!")
+            os.system(f'zenity --warning --text={offtxt} --ellipsize')
             raise SystemExit
     
     def on_remember_toggled(self, button, data=None):
@@ -1539,7 +1549,8 @@ class GUI:
             if confA == False and self.rmbe == True:
                 print("Config written")
                 parser.set('login', 'email', email)
-                file = open("/home/%s/.config/htidal.ini" % user, "w+")
+                os.system(f'mkdir -p /home/{user}/.config/htidal/')
+                file = open(f"/home/{user}/.config/htidal/htidal.ini", "w+")
                 parser.write(file)
                 file.close()
                 keyring.set_password('tidal', email, password)
@@ -1646,15 +1657,15 @@ if __name__ == "__main__":
     locale.bindtextdomain(APP, LOCALE_DIR)
     gettext.bindtextdomain(APP, LOCALE_DIR)
     gettext.textdomain(APP)
-    _ = gettext.gettext
+    gg = gettext.gettext
     parser = ConfigParser()
     user = os.popen("who|awk '{print $1}'r").read()
     user = user.rstrip()
     user = user.split('\n')[0]
-    if os.path.exists("/home/%s/.config/htidal.ini" % user):
+    if os.path.exists(f"/home/{user}/.config/htidal/htidal.ini"):
         print('Configured already')
         confA = True
-        parser.read("/home/%s/.config/htidal.ini" % user)
+        parser.read(f"/home/{user}/.config//htidal/htidal.ini")
         emailC = parser.get('login', 'email')
         qualityC = parser.get('misc', 'quality')
     else:
