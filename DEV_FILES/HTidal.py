@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import tidalapi, time, gettext, locale, keyring, gi, subprocess, re, sys, os, threading, urllib, srt, datetime, webbrowser, random, requests
+import tidalapi, time, gettext, locale, keyring, gi, subprocess, re, sys, os, threading, urllib, srt, datetime, webbrowser, random, requests, dbus, dbus.mainloop.glib, dbus.service
 from configparser import ConfigParser
 from concurrent import futures
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gst', '1.0')
-from gi.repository import Gtk, Gst, GLib, Gio, GdkPixbuf, Gdk 
+gi.require_version('Keybinder', '3.0')
+from gi.repository import Gtk, Gst, GLib, Gio, GdkPixbuf, Gdk
 from getpass import getpass
 
 class GUI:
@@ -58,6 +59,7 @@ class GUI:
         self.plaicon = self.builder.get_object("play")
         self.playbut = self.builder.get_object("playBut")
         self.slider = Gtk.HScale()
+        self.slider.set_can_focus(False)
         self.slider.set_margin_start(6)
         self.slider.set_margin_end(6)
         self.slider.set_draw_value(False)
@@ -94,28 +96,34 @@ class GUI:
         self.storeAlbum = Gtk.ListStore(str, str, int)
         # Trees (forest?)
         self.tree = Gtk.TreeView.new_with_model(self.storePlaylist)
+        self.tree.set_can_focus(False)
         self.tree.connect("row-activated", self.row_activated)
         self.tree.connect("button_press_event", self.mouse_click)
         self.tree.set_reorderable(True)
         self.allTree = Gtk.TreeView.new_with_model(self.allStore)
+        self.allTree.set_can_focus(False)
         self.allTree.connect("row-activated", self.all_row)
         self.allTree.connect("button_press_event", self.mouse_click)
         self.albumTree = Gtk.TreeView.new_with_model(self.storeAlbum)
+        self.albumTree.set_can_focus(False)
         self.albumTree.connect("row-activated", self.album_row)
         self.albumTree.connect("button_press_event", self.mouse_click)
         # Scrolls (idk)
         self.playlistBox = self.builder.get_object("expanded")
         self.scrollable_treelist = Gtk.ScrolledWindow()
+        self.scrollable_treelist.set_can_focus(False)
         self.scrollable_treelist.set_vexpand(True)
         self.scrollable_treelist.add(self.tree)
         self.playlistBox.pack_start(self.scrollable_treelist, True, True, 0)
         self.allBox = self.builder.get_object("big")
         self.allScroll = Gtk.ScrolledWindow()
+        self.allScroll.set_can_focus(False)
         self.allScroll.set_vexpand(True)
         self.allScroll.add(self.allTree)
         self.allBox.pack_start(self.allScroll, True, True, 0)
         self.albumBox = self.builder.get_object("general_top")
         self.album_scroll = Gtk.ScrolledWindow()
+        self.album_scroll.set_can_focus(False)
         self.album_scroll.set_vexpand(True)
         self.albumTree.set_vexpand(True)
         self.album_scroll.add(self.albumTree)
@@ -149,6 +157,31 @@ class GUI:
         tC = futures.ThreadPoolExecutor(max_workers=2)
         tC.submit(self.check)
 
+    def listener(self):
+        APP_ID="htidal"
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+        bus = dbus.Bus(dbus.Bus.TYPE_SESSION)
+        bus_object = bus.get_object('org.gnome.SettingsDaemon', '/org/gnome/SettingsDaemon/MediaKeys')
+        dbus_interface='org.gnome.SettingsDaemon.MediaKeys'
+        bus_object.GrabMediaPlayerKeys(APP_ID, 0, dbus_interface=dbus_interface)
+        bus_object.connect_to_signal('MediaPlayerKeyPressed', self.on_media)
+        self.mainloop = GLib.MainLoop()
+        self.mainloop.run()
+    
+    def on_media(self, app, action):
+        print(app, action)
+        if app == "htidal" and self.url:
+            if action == "Play":
+                try:
+                    self.resume()
+                except:
+                    print("Resume error")
+            elif action == "Pause":
+                try:
+                    self.pause()
+                except:
+                    print('Pause error')
+
     def on_req_clicked(self, button):
         webbrowser.open_new("https://github.com/swanux/htidal_db/issues/new?assignees=swanux&labels=enhancement&template=custom.md&title=Lyrics+request")
     
@@ -173,6 +206,7 @@ class GUI:
         if res == Gtk.ResponseType.YES:                             # if yes ...
             print('OK pressed')
             dialogWindow.destroy()
+            self.mainloop.quit()
             self.force = True
             self.stopKar = True
             raise SystemExit
@@ -192,6 +226,10 @@ class GUI:
                 self.resume()
         else:
             self.pause()
+
+    def on_key(self, widget, key):
+        if key.keyval == 32 and self.url:
+            self.on_playBut_clicked(0)
 
     def on_searchBut_clicked(self, button):
         self.expanded = False
@@ -318,6 +356,7 @@ class GUI:
             for item in items:
                 subBox = Gtk.Box.new(0, 10)
                 namBut = Gtk.Button.new_with_label("test")
+                namBut.set_can_focus(False)
                 tmpLab = namBut.get_child()
                 tmpLab.set_ellipsize(3)
                 tmpLab.set_markup('<big><b>'+item.name.replace('&', '')+'</b></big>')
@@ -855,6 +894,7 @@ class GUI:
     def mouse_click(self, widget, event):
         if event.button == 3:
             menu = Gtk.Menu()
+            menu.set_can_focus(False)
             loc = Gtk.Buildable.get_name(stack.get_visible_child())
             if self.treeType == "own" and loc == "scrollAlbum":
                 pthinfo = self.albumTree.get_path_at_pos(event.x, event.y)
@@ -862,6 +902,7 @@ class GUI:
                 self.albumTree.grab_focus()
                 self.albumTree.set_cursor(path,col,0)
                 menu_item = Gtk.MenuItem.new_with_label('Remove from playlist')
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.del_pl)
                 menu.add(menu_item)
                 menu.show_all()
@@ -869,6 +910,7 @@ class GUI:
             elif self.inFav == True and loc == "scrollMore":
                 self.btn = Gtk.Buildable.get_name(widget)
                 menu_item = Gtk.MenuItem.new_with_label('Remove from Favourites')
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.rem_fav)
                 menu.add(menu_item)
                 menu.show_all()
@@ -886,9 +928,11 @@ class GUI:
                     else:
                         state = 'Add to Favourites'
                 menu_item = Gtk.MenuItem.new_with_label(state)
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.add_cur)
                 menu.add(menu_item)
                 menu_item = Gtk.MenuItem.new_with_label('Add to playlist')
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.add_pl)
                 menu.add(menu_item)
                 menu.show_all()
@@ -899,6 +943,7 @@ class GUI:
                 self.allTree.grab_focus()
                 self.allTree.set_cursor(path,col,0)
                 menu_item = Gtk.MenuItem.new_with_label('Delete playlist')
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.del_pyl)
                 menu.add(menu_item)
                 menu.show_all()
@@ -909,6 +954,7 @@ class GUI:
                 self.tree.grab_focus()
                 self.tree.set_cursor(path,col,0)
                 menu_item = Gtk.MenuItem.new_with_label('Delete from current playqueue')
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.del_cur)
                 menu.add(menu_item)
                 this = self.tree.get_selection().get_selected_rows()[1][0][0]
@@ -919,12 +965,15 @@ class GUI:
                     else:
                         state = 'Add to Favourites'
                 menu_item = Gtk.MenuItem.new_with_label(state)
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.add_cur)
                 menu.add(menu_item)
                 menu_item = Gtk.MenuItem.new_with_label('Save current playqueue offline')
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.dl_cur)
                 menu.add(menu_item)
                 menu_item = Gtk.MenuItem.new_with_label('Add to playlist')
+                menu_item.set_can_focus(False)
                 menu_item.connect("activate", self.add_pl)
                 menu.add(menu_item)
                 menu.show_all()
@@ -1369,8 +1418,8 @@ class GUI:
         self.res = True
         self.playing = True
         self.position = 0
-        url = self.playlist[self.tnum].get_url()
-        self.player.set_property("uri", url)
+        self.url = self.playlist[self.tnum].get_url()
+        self.player.set_property("uri", self.url)
         try:
             self.albumTree.set_cursor(self.relPos)
         except:
@@ -1498,6 +1547,8 @@ class GUI:
             print("Login succesfull")
             self.bigStack.set_visible_child(self.builder.get_object("box"))
             stack.set_visible_child(self.builder.get_object("scrollHome"))
+            lis = futures.ThreadPoolExecutor(max_workers=2)
+            lis.submit(self.listener)
         except:
             print("Login failed")
             os.system('zenity --warning --text="Invalid email address or password!" --ellipsize')

@@ -199,10 +199,12 @@
   </object>
   <object class="GtkWindow" id="main">
     <property name="can_focus">False</property>
+    <property name="window_position">mouse</property>
     <property name="default_width">700</property>
     <property name="default_height">450</property>
     <property name="icon">icons/htidal.png</property>
     <signal name="delete-event" handler="on_main_delete_event" swapped="no"/>
+    <signal name="key-press-event" handler="on_key" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
@@ -223,7 +225,7 @@
                 <child>
                   <object class="GtkButton" id="backBut">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
@@ -244,7 +246,7 @@
                 <child>
                   <object class="GtkButton" id="searchBut">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
@@ -262,7 +264,7 @@
                 <child>
                   <object class="GtkButton" id="settingBut">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
@@ -303,7 +305,7 @@
                     <child>
                       <object class="GtkButton" id="newList">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -333,7 +335,7 @@
                     <child>
                       <object class="GtkScrolledWindow" id="imgScroll">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
                         <property name="margin_top">5</property>
@@ -372,7 +374,7 @@
                 <child>
                   <object class="GtkScrolledWindow" id="scrollHome">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkViewport" id="view">
@@ -447,7 +449,7 @@
                                   <object class="GtkButton" id="myLists">
                                     <property name="label" translatable="yes">My Playlists</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -465,7 +467,7 @@
                                     <property name="label" translatable="yes">Playlists by mood</property>
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -482,7 +484,7 @@
                                     <property name="label" translatable="yes">Browse genres</property>
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -498,7 +500,7 @@
                                   <object class="GtkButton" id="favs">
                                     <property name="label" translatable="yes">My Collection</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -532,7 +534,7 @@
                 <child>
                   <object class="GtkScrolledWindow" id="scrollSet">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkViewport" id="view1">
@@ -556,7 +558,7 @@
                                   <object class="GtkButton" id="wr_but">
                                     <property name="label" translatable="yes">Writer out config</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="halign">center</property>
                                     <property name="valign">center</property>
@@ -592,7 +594,7 @@
                                   <object class="GtkButton" id="signOut">
                                     <property name="label" translatable="yes">Sign out</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="halign">center</property>
                                     <property name="valign">center</property>
@@ -656,7 +658,7 @@
                                   <object class="GtkButton" id="fb">
                                     <property name="label" translatable="yes">Provide Feedback</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="halign">center</property>
                                     <property name="valign">center</property>
@@ -710,6 +712,10 @@
                                   <object class="GtkImage" id="logo">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="margin_left">5</property>
+                                    <property name="margin_right">5</property>
+                                    <property name="margin_top">10</property>
+                                    <property name="margin_bottom">5</property>
                                     <property name="pixbuf">icons/htidal.png</property>
                                   </object>
                                   <packing>
@@ -764,7 +770,7 @@ HTidal is an unofficial Tidal client for Linux which is completely opensource. I
                                   <object class="GtkButton" id="git_link">
                                     <property name="label">gtk-dialog-info</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_top">20</property>
                                     <property name="margin_bottom">10</property>
@@ -1024,7 +1030,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrollAlbum">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkViewport" id="view2">
@@ -1076,7 +1082,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           <object class="GtkButton" id="playBut1">
                                             <property name="label" translatable="yes">Play</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="margin_left">5</property>
                                             <property name="margin_right">5</property>
@@ -1096,7 +1102,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           <object class="GtkButton" id="radioBut">
                                             <property name="label" translatable="yes">Radio</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="margin_left">5</property>
                                             <property name="margin_right">5</property>
@@ -1116,7 +1122,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           <object class="GtkButton" id="otAlBut">
                                             <property name="label" translatable="yes">More Albums</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="margin_left">5</property>
                                             <property name="margin_right">5</property>
@@ -1136,7 +1142,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           <object class="GtkButton" id="otArBut">
                                             <property name="label" translatable="yes">Releated Artists</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="margin_left">5</property>
                                             <property name="margin_right">5</property>
@@ -1156,7 +1162,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           <object class="GtkButton" id="dlAlb">
                                             <property name="label" translatable="yes">Save offline</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="margin_left">5</property>
                                             <property name="margin_right">5</property>
@@ -1176,7 +1182,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           <object class="GtkButton" id="infoBut">
                                             <property name="label" translatable="yes">Add favourite</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="margin_top">5</property>
                                             <property name="margin_bottom">5</property>
@@ -1363,7 +1369,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                             <property name="height_request">60</property>
                                             <property name="visible">True</property>
                                             <property name="sensitive">False</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="valign">center</property>
                                             <property name="margin_top">5</property>
@@ -1403,7 +1409,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                               <object class="GtkButton" id="nam_lab1">
                                                 <property name="label" translatable="yes">Name</property>
                                                 <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
+                                                <property name="can_focus">False</property>
                                                 <property name="receives_default">True</property>
                                                 <property name="margin_left">5</property>
                                                 <property name="margin_right">5</property>
@@ -1429,7 +1435,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           <object class="GtkButton" id="nextRel">
                                             <property name="height_request">60</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
+                                            <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
                                             <property name="valign">center</property>
                                             <property name="margin_top">5</property>
@@ -1488,7 +1494,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkSearchEntry" id="searcher">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="margin_left">30</property>
                         <property name="margin_right">30</property>
                         <property name="margin_top">5</property>
@@ -1508,7 +1514,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkScrolledWindow" id="searchScroll">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
                         <property name="shadow_type">in</property>
@@ -1807,7 +1813,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrollMore">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkViewport" id="view3">
@@ -1837,7 +1843,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrollFavs">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkViewport" id="view4">
@@ -1879,7 +1885,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                 <child>
                                   <object class="GtkButton" id="fav_tracks">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -1910,7 +1916,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                 <child>
                                   <object class="GtkButton" id="fav_albs">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -1941,7 +1947,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                 <child>
                                   <object class="GtkButton" id="fav_lists">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -1972,7 +1978,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                 <child>
                                   <object class="GtkButton" id="fav_arts">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
@@ -2023,7 +2029,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrollCreate">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkViewport" id="view5">
@@ -2058,7 +2064,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                             <child>
                               <object class="GtkEntry" id="create_entry">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="valign">center</property>
                                 <property name="margin_left">200</property>
                                 <property name="margin_right">200</property>
@@ -2084,7 +2090,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                   <object class="GtkButton" id="cacel_but">
                                     <property name="label" translatable="yes">Cancel</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="valign">end</property>
                                     <property name="margin_left">5</property>
@@ -2104,7 +2110,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                   <object class="GtkButton" id="create_but">
                                     <property name="label" translatable="yes">Create</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="valign">end</property>
                                     <property name="margin_left">5</property>
@@ -2174,7 +2180,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkButton" id="expand">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -2193,7 +2199,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkButton" id="prevBut">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -2212,7 +2218,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkButton" id="playBut">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -2231,7 +2237,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkButton" id="nextBut">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -2250,7 +2256,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkButton" id="shuffBut">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -2269,7 +2275,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <child>
                       <object class="GtkMenuButton" id="trackMenu">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -2334,7 +2340,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
             <child>
               <object class="GtkEntry" id="email">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
                 <property name="margin_top">10</property>
@@ -2352,7 +2358,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
             <child>
               <object class="GtkEntry" id="pwd">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
                 <property name="margin_top">10</property>
@@ -2377,7 +2383,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                   <object class="GtkCheckButton" id="remember">
                     <property name="label" translatable="yes">Remember password</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">False</property>
                     <property name="halign">start</property>
                     <property name="margin_left">10</property>
@@ -2399,7 +2405,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                     <property name="label" translatable="yes">Login</property>
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="halign">end</property>
                     <property name="margin_left">10</property>
@@ -2608,7 +2614,7 @@ It's essential to make sure we don't send too many requests to Tidal servers.</p
     <child>
       <object class="GtkScrolledWindow" id="req_scroll">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
+        <property name="can_focus">False</property>
         <property name="shadow_type">in</property>
         <child>
           <object class="GtkViewport" id="req_view">
@@ -2713,19 +2719,30 @@ It's essential to make sure we don't send too many requests to Tidal servers.</p
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="req">
-                        <property name="label" translatable="yes">Request lyrics</property>
+                      <object class="GtkButton" id="req_lyr">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
-                        <property name="margin_left">130</property>
-                        <property name="margin_right">130</property>
-                        <property name="margin_top">10</property>
-                        <property name="margin_bottom">10</property>
+                        <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
                         <property name="relief">none</property>
                         <signal name="clicked" handler="on_req_clicked" swapped="no"/>
+                        <child>
+                          <object class="GtkLabel" id="req_lab">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="hexpand">True</property>
+                            <property name="vexpand">True</property>
+                            <property name="label" translatable="yes">Request Lyrics</property>
+                            <property name="justify">center</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                              <attribute name="size" value="12000"/>
+                            </attributes>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
