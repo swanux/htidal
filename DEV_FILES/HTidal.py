@@ -1676,7 +1676,7 @@ if __name__ == "__main__":
         qualityC = '0'
         parser.add_section('login')
         parser.add_section('misc')
-        os.system("./sfbknd hsuite")
+        # os.system("./sfbknd htidal")
     # GUI
     UI_FILE = "htidal.glade"
     Gst.init(None)
