@@ -6,7 +6,6 @@ from configparser import ConfigParser
 from concurrent import futures
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gst', '1.0')
-gi.require_version('Keybinder', '3.0')
 from gi.repository import Gtk, Gst, GLib, Gio, GdkPixbuf, Gdk
 from getpass import getpass
 from mediafile import MediaFile
@@ -32,10 +31,6 @@ class GUI:
         self.playlist = []
         self.builder.get_object('em_lab').set_label(emailC)
         self.builder.get_object('qual_combo').set_active(int(qualityC))
-        if qualityC == '0':
-            self.ftype = 'alac'
-        else:
-            self.ftype = 'm4a'
         self.allPlaylist = ''
         self.expanded = False
         self.position = 0
@@ -155,7 +150,7 @@ class GUI:
         for i in self.s_label:
             i.hide()
         self.force = False
-        tC = futures.ThreadPoolExecutor(max_workers=2)
+        tC = futures.ThreadPoolExecutor(max_workers=4)
         tC.submit(self.check)
 
     def listener(self):
@@ -336,7 +331,7 @@ class GUI:
             self.query = self.session.search(txt, models=[tidalapi.artist.Artist, tidalapi.album.Album, tidalapi.media.Track, tidalapi.playlist.Playlist], limit=3, offset=0)
             for i in self.boxList:
                 self.cleaner(i.get_children())
-            qld = futures.ThreadPoolExecutor(max_workers=2)
+            qld = futures.ThreadPoolExecutor(max_workers=4)
             qld.submit(self.backer)
             time.sleep(0.1)
             window.show_all()
@@ -393,7 +388,7 @@ class GUI:
                 subBox.pack_start(imaje, False, False, 0)
                 subBox.pack_end(namBut, True, True, 0)
                 moreBox.pack_end(subBox, True, True, 0)
-                ld_cov = futures.ThreadPoolExecutor(max_workers=2)
+                ld_cov = futures.ThreadPoolExecutor(max_workers=4)
                 if btn == 'track' or iType == 'track':
                     ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item.album)
                 else:
@@ -460,15 +455,16 @@ class GUI:
 
     def on_dl_alb(self, button):
         iType = self.get_type(self.album)
-        dl = futures.ThreadPoolExecutor(max_workers=2)
+        dl = futures.ThreadPoolExecutor(max_workers=4)
         dl.submit(self.general_download, items=self.album.tracks(), tpe=iType, name=self.album.name)
         self.dlStack.set_visible_child(self.dlBox1)
         self.dlWin.show_all()
 
     def on_dload_activate(self, widget):
-        dl = futures.ThreadPoolExecutor(max_workers=2)
+        dl = futures.ThreadPoolExecutor(max_workers=4)
         dl.submit(self.general_download, items=[self.playlist[self.tnum]], tpe='track')
         self.dlStack.set_visible_child(self.dlBox)
+        self.whLab.set_label("Preparing...")
         self.dlWin.show_all()
 
     def general_download(self, items, tpe, name=''):
@@ -501,7 +497,7 @@ class GUI:
         self.dlBar.set_fraction(0.00)
         self.dlded = 0
         self.dlStack.set_visible_child(self.dlBox)
-        dl = futures.ThreadPoolExecutor(max_workers=2)
+        dl = futures.ThreadPoolExecutor(max_workers=4)
         dl.submit(self.dl_backend, dlDir=dlDir)
         def counter(timer):
             if self.dlded < self.tot_size:
@@ -1019,7 +1015,7 @@ class GUI:
     def dl_cur(self, item):
         now = datetime.datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-        dl = futures.ThreadPoolExecutor(max_workers=2)
+        dl = futures.ThreadPoolExecutor(max_workers=4)
         dl.submit(self.general_download, items=self.playlist, tpe='playqueue', name=f"Playqueue_{str(dt_string).replace('.', '-').replace(' ', '_')}")
         self.dlStack.set_visible_child(self.dlBox1)
         self.dlWin.show_all()
@@ -1102,7 +1098,7 @@ class GUI:
             print("No playbin yet to stop.")
         self.globSeek = True
         self.x = 0
-        ld_cov = futures.ThreadPoolExecutor(max_workers=2)
+        ld_cov = futures.ThreadPoolExecutor(max_workers=4)
         ld_cov.submit(self.load_cover)
         self.play()
 
@@ -1126,7 +1122,7 @@ class GUI:
         except:
             print("No playbin yet to stop.")
         self.x = 0
-        ld_cov = futures.ThreadPoolExecutor(max_workers=2)
+        ld_cov = futures.ThreadPoolExecutor(max_workers=4)
         ld_cov.submit(self.load_cover)
         self.play()
 
@@ -1291,7 +1287,7 @@ class GUI:
                     column.set_sort_indicator(False)
                     self.tree.append_column(column)
             self.playlistPlayer = True
-            ld_cov = futures.ThreadPoolExecutor(max_workers=2)
+            ld_cov = futures.ThreadPoolExecutor(max_workers=4)
             ld_cov.submit(self.load_cover)
             if allPos == 'radio':
               self.on_next('clickModel')
@@ -1372,7 +1368,7 @@ class GUI:
                     column.set_sort_column_id(i)
                     self.albumTree.append_column(column)
             self.albume = True
-            ld_cov = futures.ThreadPoolExecutor(max_workers=2)
+            ld_cov = futures.ThreadPoolExecutor(max_workers=4)
             if playlistLoc == "myList":
                 self.namer.set_label(self.allPlaylist[allPos].name)
             else:
@@ -1429,6 +1425,11 @@ class GUI:
         self.playing = True
         self.position = 0
         self.url = self.playlist[self.tnum].get_url()
+        tmp = str(self.playlist[self.tnum].audio_quality)
+        if "lossless" in tmp:
+            self.ftype = "alac"
+        else:
+            self.ftype = "m4a"
         self.player.set_property("uri", self.url)
         try:
             self.albumTree.set_cursor(self.relPos)
@@ -1543,7 +1544,7 @@ class GUI:
             self.userID = self.session.user.id
             # Favourites
             self.favourite = tidalapi.user.Favorites(self.session, self.userID)
-            ldg = futures.ThreadPoolExecutor(max_workers=2)
+            ldg = futures.ThreadPoolExecutor(max_workers=4)
             ldg.submit(self.favver)
             ### End
             if confA == False and self.rmbe == True:
@@ -1558,7 +1559,7 @@ class GUI:
             print("Login succesfull")
             self.bigStack.set_visible_child(self.builder.get_object("box"))
             stack.set_visible_child(self.builder.get_object("scrollHome"))
-            lis = futures.ThreadPoolExecutor(max_workers=2)
+            lis = futures.ThreadPoolExecutor(max_workers=4)
             lis.submit(self.listener)
         except:
             print("Login failed")
@@ -1675,6 +1676,7 @@ if __name__ == "__main__":
         qualityC = '0'
         parser.add_section('login')
         parser.add_section('misc')
+        os.system("./sfbknd hsuite")
     # GUI
     UI_FILE = "htidal.glade"
     Gst.init(None)
