@@ -55,6 +55,5 @@ program = icons/
 	htidal.glade
 	HTidal.py
 	htidal.sh
-	sfbknd
 entry = htidal.desktop
 
