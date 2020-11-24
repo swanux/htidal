@@ -349,8 +349,11 @@ class GUI:
         if items == []:
             print(f'Not in this category {btn}')
         else:
-            moreBox = Gtk.Box.new(1, 10)
-            moreBox.set_homogeneous(True)
+            # moreBox = Gtk.Box.new(1, 10)
+            # moreBox.set_homogeneous(True)
+            moreGrid = Gtk.Grid.new()
+            moreGrid.set_homogeneous(True)
+            moreGrid.set_can_focus(False)
             zed = 0
             for item in items:
                 subBox = Gtk.Box.new(0, 10)
@@ -387,15 +390,18 @@ class GUI:
                 imaje.set_margin_bottom(10)
                 subBox.pack_start(imaje, False, False, 0)
                 subBox.pack_end(namBut, True, True, 0)
-                moreBox.pack_end(subBox, True, True, 0)
+                # moreBox.pack_end(subBox, True, True, 0)
+                moreGrid.attach_next_to(subBox, None, 0, 1, 1)
                 ld_cov = futures.ThreadPoolExecutor(max_workers=4)
                 if btn == 'track' or iType == 'track':
                     ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item.album)
                 else:
                     ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item)
                 zed += 1
-            targetParent.pack_start(moreBox, True, True, 0)
-            moreBox.show_all()
+            # targetParent.pack_start(moreBox, True, True, 0)
+            targetParent.pack_start(moreGrid, True, True, 0)
+            # moreBox.show_all()
+            moreGrid.show_all()
 
     def on_git_link_clicked(self, button):
         # open project page in browser
