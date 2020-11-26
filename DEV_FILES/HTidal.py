@@ -311,9 +311,15 @@ class GUI:
             for i in self.s_label:
                 if "artist" in Gtk.Buildable.get_name(i):
                     i.hide()
+        print(self.query['albums'])
         if self.query['albums'] == []:
             for i in self.s_label:
                 if "album" in Gtk.Buildable.get_name(i):
+                    i.hide()
+        # print(self.query['top_hit'])
+        if self.query['top_hit'] == []:
+            for i in self.s_label:
+                if "top" in Gtk.Buildable.get_name(i):
                     i.hide()
         if self.query['playlists'] == []:
             for i in self.s_label:
@@ -328,14 +334,14 @@ class GUI:
             for i in self.boxList:
                 self.cleaner(i.get_children())
         else:
-            self.query = self.session.search(txt, models=[tidalapi.artist.Artist, tidalapi.album.Album, tidalapi.media.Track, tidalapi.playlist.Playlist], limit=3, offset=0)
+            self.query = self.session.search(txt, models=[tidalapi.artist.Artist, tidalapi.album.Album, tidalapi.media.Track, tidalapi.playlist.Playlist], limit=25, offset=0)
             for i in self.boxList:
                 self.cleaner(i.get_children())
             qld = futures.ThreadPoolExecutor(max_workers=4)
             qld.submit(self.backer)
             time.sleep(0.1)
             window.show_all()
-            self.seClean()
+            # self.seClean()
 
     def cleaner(self, lis):
         if lis == []:
@@ -349,19 +355,28 @@ class GUI:
         if items == []:
             print(f'Not in this category {btn}')
         else:
-            # moreBox = Gtk.Box.new(1, 10)
-            # moreBox.set_homogeneous(True)
-            moreGrid = Gtk.Grid.new()
-            moreGrid.set_homogeneous(True)
-            moreGrid.set_can_focus(False)
+            if targetParent == self.boxMore:
+                moreBox = Gtk.Box.new(1, 10)
+                moreBox.set_homogeneous(True)
+                moreBox.set_can_focus(False)
+            else:
+                moreGrid = Gtk.Grid.new()
+                moreGrid.set_can_focus(False)
             zed = 0
+            prev = None
             for item in items:
-                subBox = Gtk.Box.new(0, 10)
+                if targetParent == self.boxMore:
+                    subBox = Gtk.Box.new(0, 10)
+                else:
+                    subBox = Gtk.Box.new(1, 10)
                 namBut = Gtk.Button.new_with_label("test")
                 namBut.set_can_focus(False)
                 tmpLab = namBut.get_child()
                 tmpLab.set_ellipsize(3)
-                tmpLab.set_markup('<big><b>'+item.name.replace('&', '')+'</b></big>')
+                if targetParent == self.boxMore:
+                    tmpLab.set_markup('<big><b>'+item.name.replace('&', 'and')+'</b></big>')
+                else:
+                    tmpLab.set_label(item.name.replace('&', 'and'))
                 tmpLab.set_halign(Gtk.Align(1))
                 tmpLab.set_valign(Gtk.Align(3))
                 namBut.set_relief(Gtk.ReliefStyle.NONE)
@@ -386,22 +401,36 @@ class GUI:
                 imaje = Gtk.Image.new()
                 imaje.set_margin_start(10)
                 imaje.set_margin_end(10)
-                imaje.set_margin_top(10)
-                imaje.set_margin_bottom(10)
+                if targetParent == self.boxMore:
+                    imaje.set_margin_bottom(10)
+                    imaje.set_margin_top(10)
+                else:
+                    imaje.set_margin_top(5)
                 subBox.pack_start(imaje, False, False, 0)
                 subBox.pack_end(namBut, True, True, 0)
-                # moreBox.pack_end(subBox, True, True, 0)
-                moreGrid.attach_next_to(subBox, None, 0, 1, 1)
+                if targetParent == self.boxMore:
+                    moreBox.pack_end(subBox, True, True, 0)
+                else:
+                    moreGrid.attach_next_to(subBox, prev, 0, 1, 1)
+                prev = subBox
                 ld_cov = futures.ThreadPoolExecutor(max_workers=4)
                 if btn == 'track' or iType == 'track':
                     ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item.album)
                 else:
                     ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item)
                 zed += 1
-            # targetParent.pack_start(moreBox, True, True, 0)
-            targetParent.pack_start(moreGrid, True, True, 0)
-            # moreBox.show_all()
-            moreGrid.show_all()
+            yetScroll = Gtk.ScrolledWindow()
+            yetScroll.set_can_focus(False)
+            yetScroll.set_vexpand(True)
+            yetScroll.set_hexpand(True)
+            yetScroll.set_size_request(-1, 185)
+            yetScroll.set_margin_end(10)
+            if targetParent == self.boxMore:
+                yetScroll.add(moreBox)
+            else:
+                yetScroll.add(moreGrid)
+            targetParent.pack_start(yetScroll, True, True, 0)
+            yetScroll.show_all()
 
     def on_git_link_clicked(self, button):
         # open project page in browser
@@ -425,7 +454,7 @@ class GUI:
                 items = self.artist.get_similar()
                 self.query['artists'] = items
         self.constructor(self.boxMore, items, btn)
-        stack.set_visible_child(self.builder.get_object("scrollMore"))
+        stack.set_visible_child(self.boxMore)
 
     def on_go_radio(self, widget):
         if self.artist == '':
@@ -633,9 +662,9 @@ class GUI:
             items = self.favAlbs
             self.query['albums'] = items
             btn = "album"
+        stack.set_visible_child(self.boxMore)
         self.constructor(self.boxMore, items, btn)
         self.inFav = True
-        stack.set_visible_child(self.builder.get_object("scrollMore"))
 
     def on_favs_clicked(self, button):
         stack.set_visible_child(self.builder.get_object("scrollFavs"))
@@ -920,7 +949,7 @@ class GUI:
                 menu.add(menu_item)
                 menu.show_all()
                 menu.popup_at_pointer()
-            elif self.inFav == True and loc == "scrollMore":
+            elif self.inFav == True and loc == "more_box":
                 self.btn = Gtk.Buildable.get_name(widget)
                 menu_item = Gtk.MenuItem.new_with_label('Remove from Favourites')
                 menu_item.set_can_focus(False)
@@ -1184,7 +1213,10 @@ class GUI:
             pic = something.image(320)
             response = urllib.request.urlopen(pic)
             input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
-            coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 55, 55, True, None)
+            if widget.get_margin_bottom() == 10:
+                coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 70, 70, True, None)
+            else:
+                coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 150, 150, True, None)
             tg = GLib.idle_add(widget.set_from_pixbuf, coverBuf)
 
     def on_expand_clicked(self, button):
@@ -1547,6 +1579,7 @@ class GUI:
         self.session = tidalapi.Session(self.c)
         try:
             self.session.login(email, password)
+            print("Login succesfull")
             self.userID = self.session.user.id
             # Favourites
             self.favourite = tidalapi.user.Favorites(self.session, self.userID)
@@ -1562,7 +1595,6 @@ class GUI:
                 file.close()
                 keyring.set_password('tidal', email, password)
                 print("Saved")
-            print("Login succesfull")
             self.bigStack.set_visible_child(self.builder.get_object("box"))
             stack.set_visible_child(self.builder.get_object("scrollHome"))
             lis = futures.ThreadPoolExecutor(max_workers=4)

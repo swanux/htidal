@@ -22,7 +22,7 @@ import random
 import uuid
 from enum import Enum
 
-# import json
+import json
 import requests
 
 import tidalapi.playlist

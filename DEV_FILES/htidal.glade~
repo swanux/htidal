@@ -138,12 +138,6 @@
     <property name="icon_name">emblem-downloads</property>
     <property name="use_fallback">True</property>
   </object>
-  <object class="GtkImage" id="mix">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">modem</property>
-    <property name="use_fallback">True</property>
-  </object>
   <object class="GtkImage" id="new">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -202,12 +196,6 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">media-tape</property>
-    <property name="use_fallback">True</property>
-  </object>
-  <object class="GtkImage" id="rel">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">multimedia-player</property>
     <property name="use_fallback">True</property>
   </object>
   <object class="GtkImage" id="search">
@@ -312,6 +300,7 @@
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkBox" id="but_box_main">
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
@@ -319,61 +308,6 @@
                     <property name="vexpand">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">3</property>
-                    <child>
-                      <object class="GtkLabel" id="exp_lab">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="label" translatable="yes">Explore</property>
-                        <attributes>
-                          <attribute name="weight" value="thin"/>
-                          <attribute name="size" value="9000"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="mixes">
-                        <property name="label" translatable="yes">My Mixes</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="margin_left">10</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="image">mix</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="newRel">
-                        <property name="label" translatable="yes">New Releases</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="margin_left">10</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="image">rel</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkLabel" id="favLab">
                         <property name="visible">True</property>
@@ -1687,7 +1621,8 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                         <child>
                           <object class="GtkSearchEntry" id="searcher">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="is_focus">True</property>
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
                             <property name="primary_icon_name">edit-find-symbolic</property>
