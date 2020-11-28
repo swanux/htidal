@@ -259,7 +259,7 @@
         <child>
           <object class="GtkButton" id="searchBut">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="image">search</property>
             <signal name="clicked" handler="on_searchBut_clicked" swapped="no"/>
@@ -271,7 +271,7 @@
         <child>
           <object class="GtkButton" id="settingBut">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="image">settings</property>
             <signal name="clicked" handler="on_settingBut_clicked" swapped="no"/>

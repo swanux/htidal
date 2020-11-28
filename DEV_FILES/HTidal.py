@@ -334,7 +334,7 @@ class GUI:
             for i in self.boxList:
                 self.cleaner(i.get_children())
         else:
-            self.query = self.session.search(txt, models=[tidalapi.artist.Artist, tidalapi.album.Album, tidalapi.media.Track, tidalapi.playlist.Playlist], limit=25, offset=0)
+            self.query = self.session.search(txt, models=[tidalapi.artist.Artist, tidalapi.album.Album, tidalapi.media.Track, tidalapi.playlist.Playlist], limit=20, offset=0)
             for i in self.boxList:
                 self.cleaner(i.get_children())
             qld = futures.ThreadPoolExecutor(max_workers=4)
@@ -357,7 +357,7 @@ class GUI:
         else:
             if targetParent == self.boxMore:
                 moreBox = Gtk.Box.new(1, 10)
-                moreBox.set_homogeneous(True)
+                moreBox.set_homogeneous(False)
                 moreBox.set_can_focus(False)
             else:
                 moreGrid = Gtk.Grid.new()
@@ -371,6 +371,7 @@ class GUI:
                     subBox = Gtk.Box.new(1, 10)
                 namBut = Gtk.Button.new_with_label("test")
                 namBut.set_can_focus(False)
+                namBut.set_size_request(-1, 25)
                 tmpLab = namBut.get_child()
                 tmpLab.set_ellipsize(3)
                 if targetParent == self.boxMore:
@@ -380,36 +381,49 @@ class GUI:
                 tmpLab.set_halign(Gtk.Align(1))
                 tmpLab.set_valign(Gtk.Align(3))
                 namBut.set_relief(Gtk.ReliefStyle.NONE)
+                imaje = Gtk.Image.new()
+                evBox = Gtk.EventBox.new()
                 iType = "general"
                 if btn == 'otAlBut':
                     Gtk.Buildable.set_name(namBut, f"s_album{zed}")
+                    Gtk.Buildable.set_name(evBox, f"img_s_album{zed}")
                 elif btn == 'track':
                     Gtk.Buildable.set_name(namBut, f"s_track{zed}")
+                    Gtk.Buildable.set_name(evBox, f"img_s_track{zed}")
                 elif btn == 'album':
                     Gtk.Buildable.set_name(namBut, f"s_album{zed}")
+                    Gtk.Buildable.set_name(evBox, f"img_s_album{zed}")
                 elif btn == 'artist':
                     Gtk.Buildable.set_name(namBut, f"s_art{zed}")
+                    Gtk.Buildable.set_name(evBox, f"img_s_art{zed}")
                 elif btn == 'playlist':
                     Gtk.Buildable.set_name(namBut, f"s_playl{zed}")
+                    Gtk.Buildable.set_name(evBox, f"img_s_playl{zed}")
                 elif btn == 'top':
                     Gtk.Buildable.set_name(namBut, f"s_top")
+                    Gtk.Buildable.set_name(evBox, f"img_s_top{zed}")
                     iType = self.get_type(item)
                 else:
                     Gtk.Buildable.set_name(namBut, f"s_art{zed}")
+                    Gtk.Buildable.set_name(evBox, f"img_s_art{zed}")
                 namBut.connect("clicked", self.on_searchItem_clicked)
                 namBut.connect("button_press_event", self.mouse_click)
-                imaje = Gtk.Image.new()
                 imaje.set_margin_start(10)
                 imaje.set_margin_end(10)
+                evBox.connect("button_press_event", self.image_click)
                 if targetParent == self.boxMore:
                     imaje.set_margin_bottom(10)
                     imaje.set_margin_top(10)
+                    evBox.add(imaje)
+                    subBox.pack_start(evBox, False, False, 0)
+                    subBox.pack_start(namBut, True, True, 0)
                 else:
                     imaje.set_margin_top(5)
-                subBox.pack_start(imaje, False, False, 0)
-                subBox.pack_end(namBut, True, True, 0)
+                    evBox.add(imaje)
+                    subBox.pack_start(evBox, False, False, 0)
+                    subBox.pack_end(namBut, True, True, 0)
                 if targetParent == self.boxMore:
-                    moreBox.pack_end(subBox, True, True, 0)
+                    moreBox.pack_start(subBox, False, False, 0)
                 else:
                     moreGrid.attach_next_to(subBox, prev, 0, 1, 1)
                 prev = subBox
@@ -423,7 +437,7 @@ class GUI:
             yetScroll.set_can_focus(False)
             yetScroll.set_vexpand(True)
             yetScroll.set_hexpand(True)
-            yetScroll.set_size_request(-1, 185)
+            yetScroll.set_size_request(-1, 190)
             yetScroll.set_margin_end(10)
             if targetParent == self.boxMore:
                 yetScroll.add(moreBox)
@@ -933,6 +947,10 @@ class GUI:
             self.favPlys = self.favourite.playlists()
             self.on_fav_gen("list")
 
+    def image_click(self, widget, event):
+        if event.button == 1:
+            self.on_searchItem_clicked(widget)
+
     def mouse_click(self, widget, event):
         if event.button == 3:
             menu = Gtk.Menu()
@@ -1210,13 +1228,18 @@ class GUI:
             except:
                 pass
         elif where == 'search':
-            pic = something.image(320)
-            response = urllib.request.urlopen(pic)
-            input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
-            if widget.get_margin_bottom() == 10:
-                coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 70, 70, True, None)
+            nam = f"/tmp/htidal/thumbnails/{something.id}"
+            if os.path.exists(nam):
+                pass
             else:
-                coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 150, 150, True, None)
+                pic = something.image(320)
+                response = urllib.request.urlopen(pic)
+                with open(nam, "wb") as img:
+                    img.write(response.read())
+            if widget.get_margin_bottom() == 10:
+                coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, 70, 70, True)
+            else:
+                coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, 150, 150, True)
             tg = GLib.idle_add(widget.set_from_pixbuf, coverBuf)
 
     def on_expand_clicked(self, button):
@@ -1729,4 +1752,5 @@ if __name__ == "__main__":
             app.bigStack.set_visible_child(app.builder.get_object("loginBox"))
     else:
         app.bigStack.set_visible_child(app.builder.get_object("loginBox"))
+    os.system("mkdir -p /tmp/htidal/thumbnails")
     Gtk.main()
