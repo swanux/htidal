@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import tidalapi, time, gettext, locale, keyring, gi, subprocess, re, sys, os, threading, urllib, srt, datetime, webbrowser, random, requests, dbus, dbus.mainloop.glib, dbus.service
+import tidalapi, time, gettext, locale, keyring, gi, subprocess, re, sys, os, threading, urllib, srt, datetime, webbrowser, random, requests, dbus, dbus.mainloop.glib, dbus.service, cairo, math
 from configparser import ConfigParser
 from concurrent import futures
 gi.require_version('Gtk', '3.0')
@@ -145,6 +145,7 @@ class GUI:
             window.set_title(version+' (as superuser)')
         else:
             window.set_title(version)
+        window.connect('size-allocate', self._on_size_allocated)
         # Display the program
         window.show_all()
         for i in self.s_label:
@@ -258,13 +259,17 @@ class GUI:
         if 's_top' in btn:
             item = self.query['top_hit']
         elif 's_track' in btn:
-            item = self.query['tracks'][int(re.findall(r'\d+', btn)[0])]
+            lis = self.query['tracks'][::-1]
+            item = lis[int(re.findall(r'\d+', btn)[0])]
         elif 's_art' in btn:
-            item = self.query['artists'][int(re.findall(r'\d+', btn)[0])]
+            lis = self.query['artists'][::-1]
+            item = lis[int(re.findall(r'\d+', btn)[0])]
         elif 's_album' in btn:
-            item = self.query['albums'][int(re.findall(r'\d+', btn)[0])]
+            lis = self.query['albums'][::-1]
+            item = lis[int(re.findall(r'\d+', btn)[0])]
         elif 's_playl' in btn:
-            item = self.query['playlists'][int(re.findall(r'\d+', btn)[0])]
+            lis = self.query['playlists'][::-1]
+            item = lis[int(re.findall(r'\d+', btn)[0])]
         iType = self.get_type(item)
         if iType == 'artist':
             self.artist = item
@@ -274,6 +279,10 @@ class GUI:
             stack.set_visible_child(self.builder.get_object('scrollAlbum'))
             self.builder.get_object("dlAlb").hide()
             self.prevSlide = stack.get_visible_child()
+            self.cleaner(self.builder.get_object("relateds").get_children())
+            tmi = self.artist.get_albums(limit=None, offset=0)
+            self.query['albums'] = tmi
+            self.constructor(self.builder.get_object("relateds"), tmi, 'album')
             self.builder.get_object("general_bottom").show()
         elif iType == 'album' or iType == 'playlist':
             self.album = item
@@ -291,40 +300,44 @@ class GUI:
                 self.builder.get_object("general_bottom").hide()
             else:
                 print('showing')
+                self.cleaner(self.builder.get_object("relateds").get_children())
+                tmi = self.album.artist.get_albums(limit=None, offset=0)
+                self.query['albums'] = tmi
+                self.constructor(self.builder.get_object("relateds"), tmi, 'album')
                 self.builder.get_object("general_bottom").show()
         elif iType == 'track':
             self.gen_playlist_view(name='playlistPlayer', playlistLoc=item, again=self.playlistPlayer, allPos='radio')
 
     def backer(self):
+        self.constructor(self.boxList[4], [self.query['top_hit']], 'top')
         self.constructor(self.boxList[0], self.query['tracks'], 'track')
         self.constructor(self.boxList[1], self.query['artists'], 'artist')
         self.constructor(self.boxList[2], self.query['albums'], 'album')
         self.constructor(self.boxList[3], self.query['playlists'], 'playlist')
-        self.constructor(self.boxList[4], [self.query['top_hit']], 'top')
     
-    def seClean(self):
-        if self.query['tracks'] == []:
-            for i in self.s_label:
-                if "track" in Gtk.Buildable.get_name(i):
-                    i.hide()
-        if self.query['artists'] == []:
-            for i in self.s_label:
-                if "artist" in Gtk.Buildable.get_name(i):
-                    i.hide()
-        print(self.query['albums'])
-        if self.query['albums'] == []:
-            for i in self.s_label:
-                if "album" in Gtk.Buildable.get_name(i):
-                    i.hide()
-        # print(self.query['top_hit'])
-        if self.query['top_hit'] == []:
-            for i in self.s_label:
-                if "top" in Gtk.Buildable.get_name(i):
-                    i.hide()
-        if self.query['playlists'] == []:
-            for i in self.s_label:
-                if "playlist" in Gtk.Buildable.get_name(i):
-                    i.hide()
+    # def seClean(self):
+    #     if self.query['tracks'] == []:
+    #         for i in self.s_label:
+    #             if "track" in Gtk.Buildable.get_name(i):
+    #                 i.hide()
+    #     if self.query['artists'] == []:
+    #         for i in self.s_label:
+    #             if "artist" in Gtk.Buildable.get_name(i):
+    #                 i.hide()
+    #     print(self.query['albums'])
+    #     if self.query['albums'] == []:
+    #         for i in self.s_label:
+    #             if "album" in Gtk.Buildable.get_name(i):
+    #                 i.hide()
+    #     # print(self.query['top_hit'])
+    #     if self.query['top_hit'] == []:
+    #         for i in self.s_label:
+    #             if "top" in Gtk.Buildable.get_name(i):
+    #                 i.hide()
+    #     if self.query['playlists'] == []:
+    #         for i in self.s_label:
+    #             if "playlist" in Gtk.Buildable.get_name(i):
+    #                 i.hide()
 
     def on_searcher_search_changed(self, widget):
         txt = widget.get_text()
@@ -364,7 +377,7 @@ class GUI:
                 moreGrid.set_can_focus(False)
             zed = 0
             prev = None
-            for item in items:
+            for item in reversed(items):
                 if targetParent == self.boxMore:
                     subBox = Gtk.Box.new(0, 10)
                 else:
@@ -437,7 +450,7 @@ class GUI:
             yetScroll.set_can_focus(False)
             yetScroll.set_vexpand(True)
             yetScroll.set_hexpand(True)
-            yetScroll.set_size_request(-1, 190)
+            yetScroll.set_size_request(-1, 200)
             yetScroll.set_margin_end(10)
             if targetParent == self.boxMore:
                 yetScroll.add(moreBox)
@@ -483,6 +496,10 @@ class GUI:
         self.gen_playlist_view(name='album', playlistLoc=self.artist, again=self.albume, allPos='artistLoad')
         self.expanded = False
         stack.set_visible_child(self.builder.get_object('scrollAlbum'))
+        self.cleaner(self.builder.get_object("relateds").get_children())
+        tmi = self.artist.get_albums(limit=None, offset=0)
+        self.query['albums'] = tmi
+        self.constructor(self.builder.get_object("relateds"), tmi, 'album')
         self.builder.get_object("general_bottom").show()
         self.builder.get_object("dlAlb").hide()
         self.prevSlide = stack.get_visible_child()
@@ -491,13 +508,14 @@ class GUI:
         btn = Gtk.Buildable.get_name(widget)
         if btn == 'goAlbum':
             self.album = self.playlist[self.tnum].album
-        else:
-            print('relplace')
-            self.album = self.relList[self.relepo]
         self.artist = ''
         self.gen_playlist_view(name='album', playlistLoc=self.album, again=self.albume)
         self.expanded = False
         stack.set_visible_child(self.builder.get_object('scrollAlbum'))
+        self.cleaner(self.builder.get_object("relateds").get_children())
+        tmi = self.album.artist.get_albums(limit=None, offset=0)
+        self.query['albums'] = tmi
+        self.constructor(self.builder.get_object("relateds"), tmi, 'album')
         self.builder.get_object("general_bottom").show()
         self.builder.get_object("dlAlb").show()
         self.prevSlide = stack.get_visible_child()
@@ -1179,63 +1197,86 @@ class GUI:
         ld_cov.submit(self.load_cover)
         self.play()
 
-    def next_rel(self, button):
-        self.relepo += 1
-        if self.relepo == len(self.relList)-1:
-            self.builder.get_object("nextRel").set_sensitive(False)
-        if self.relepo == 1:
-            self.builder.get_object("prevRel").set_sensitive(True)
-        self.skipper()
+    # def next_rel(self, button):
+    #     self.relepo += 1
+    #     if self.relepo == len(self.relList)-1:
+    #         self.builder.get_object("nextRel").set_sensitive(False)
+    #     if self.relepo == 1:
+    #         self.builder.get_object("prevRel").set_sensitive(True)
+    #     self.skipper()
 
-    def prev_rel(self, button):
-        self.relepo -= 1
-        if self.relepo == len(self.relList)-2:
-            self.builder.get_object("nextRel").set_sensitive(True)
-        if self.relepo == 0:
-            self.builder.get_object("prevRel").set_sensitive(False)
-        self.skipper()
+    # def prev_rel(self, button):
+    #     self.relepo -= 1
+    #     if self.relepo == len(self.relList)-2:
+    #         self.builder.get_object("nextRel").set_sensitive(True)
+    #     if self.relepo == 0:
+    #         self.builder.get_object("prevRel").set_sensitive(False)
+    #     self.skipper()
 
-    def skipper(self):
+    # def skipper(self):
+    #     x, y = window.get_size()
+    #     album = self.relList[self.relepo]
+    #     pic = album.image(640)
+    #     response = urllib.request.urlopen(pic)
+    #     input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
+    #     num = int(y/2.8)
+    #     coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, num, num, True, None)
+    #     tg = GLib.idle_add(self.relis.set_from_pixbuf, coverBuf)
+    #     tg2 = GLib.idle_add(self.rels.set_label, album.name)
+
+    def _on_size_allocated(self, widget, alloc):
         x, y = window.get_size()
-        album = self.relList[self.relepo]
-        pic = album.image(640)
-        response = urllib.request.urlopen(pic)
-        input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
-        num = int(y/2.8)
-        coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, num, num, True, None)
-        tg = GLib.idle_add(self.relis.set_from_pixbuf, coverBuf)
-        tg2 = GLib.idle_add(self.rels.set_label, album.name)
+        try:
+            if int(x/2.4) - int(self.w/2.4) >= 20 or int(self.w/2.4) - int(x/2.4) >= 20:
+                nam = f"/tmp/htidal/thumbnails/{self.playlist[self.tnum].album.id}"
+                coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, int(x/2.4), int(y/1.4), True)
+                self.w, self.h = x, y
+                self.trackCover.clear()
+                tg = GLib.idle_add(self.trackCover.set_from_pixbuf, coverBuf)
+        except:
+            pass
 
     def load_cover(self, where='', widget='', something=''):
         # print("Load cover")
-        x, y = window.get_size()
+        self.w, self.h = window.get_size()
         if where == '':
             album = self.playlist[self.tnum].album
-            pic = album.image(640)
-            response = urllib.request.urlopen(pic)
-            input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
-            coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, int(x/2.1), int(y/1.3), False, None)
+            nam = f"/tmp/htidal/thumbnails/{album.id}"
+            if os.path.exists(nam):
+                print("In cache")
+                pass
+            else:
+                try:
+                    pic = album.image(640)
+                    response = urllib.request.urlopen(pic)
+                    with open(nam, "wb") as img:
+                        img.write(response.read())
+                except:
+                    nam = f"icons/album.png"
+            coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, int(self.w/2.4), int(self.h/1.4), True)
             tg = GLib.idle_add(self.trackCover.set_from_pixbuf, coverBuf)
         elif where == 'album':
-            pic = something.image(320)
-            response = urllib.request.urlopen(pic)
-            input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
-            coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 190, 190, True, None)
-            tg = GLib.idle_add(self.alb_cover.set_from_pixbuf, coverBuf)
-            self.relepo = 0
             try:
-                self.skipper()
+                pic = something.image(320)
+                response = urllib.request.urlopen(pic)
+                input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
+                coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 190, 190, True, None)
             except:
-                pass
+                coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(f"icons/{self.get_type(something)}.png", 190, 190, True)
+            tg = GLib.idle_add(self.alb_cover.set_from_pixbuf, coverBuf)
+            # self.relepo = 0
         elif where == 'search':
             nam = f"/tmp/htidal/thumbnails/{something.id}"
             if os.path.exists(nam):
                 pass
             else:
-                pic = something.image(320)
-                response = urllib.request.urlopen(pic)
-                with open(nam, "wb") as img:
-                    img.write(response.read())
+                try:
+                    pic = something.image(320)
+                    response = urllib.request.urlopen(pic)
+                    with open(nam, "wb") as img:
+                        img.write(response.read())
+                except:
+                    nam = f"icons/{self.get_type(something)}.png"
             if widget.get_margin_bottom() == 10:
                 coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, 70, 70, True)
             else:
@@ -1339,7 +1380,7 @@ class GUI:
                     renderer.set_property("ellipsize", True)
                     column = Gtk.TreeViewColumn(column_title, renderer, text=i)
                     if column_title == "Title" or column_title == "Artist":
-                        column.set_fixed_width(150)
+                        column.set_fixed_width(140)
                         column.set_resizable(True)
                     else:
                         column.set_max_width(50)
@@ -1440,7 +1481,7 @@ class GUI:
                 except:
                     self.dat_role.set_label('No bio avilable')
                 self.topOrNot.set_label("Top Tracks")
-                self.relList = playlistLoc.get_albums(limit=None, offset=0)
+                # self.relList = playlistLoc.get_albums(limit=None, offset=0)
                 self.exLab.set_label("Albums")
                 for i in self.favArts:
                     if playlistLoc.id == i.id:
@@ -1465,8 +1506,8 @@ class GUI:
                     self.builder.get_object("otArBut").hide()
                 else:
                     self.dat_role.set_label(str(playlistLoc.release_date).split(' ')[0])
-                    self.builder.get_object("prevRel").set_sensitive(False)
-                    self.relList = playlistLoc.artist.get_albums(limit=None, offset=0)
+                    # self.builder.get_object("prevRel").set_sensitive(False)
+                    # self.relList = playlistLoc.artist.get_albums(limit=None, offset=0)
                     for i in self.favAlbs:
                         if playlistLoc.id == i.id:
                             state = 'Remove from Favourites'
@@ -1474,7 +1515,7 @@ class GUI:
                         else:
                             state = 'Add to Favourites'
                 self.topOrNot.set_label("Tracks")
-                self.exLab.set_label("Releated")
+                self.exLab.set_label("Related")
             if playlistLoc != "myList":
                 self.fLab.set_label(state)
                 ld_cov.submit(self.load_cover, where='album', something=playlistLoc)

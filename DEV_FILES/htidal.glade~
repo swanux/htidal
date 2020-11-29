@@ -144,12 +144,6 @@
     <property name="icon_name">list-add</property>
     <property name="use_fallback">True</property>
   </object>
-  <object class="GtkImage" id="nex">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-next</property>
-    <property name="use_fallback">True</property>
-  </object>
   <object class="GtkImage" id="next">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -178,12 +172,6 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">format-indent-more</property>
-    <property name="use_fallback">True</property>
-  </object>
-  <object class="GtkImage" id="prev">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-previous</property>
     <property name="use_fallback">True</property>
   </object>
   <object class="GtkImage" id="previous">
@@ -259,7 +247,7 @@
         <child>
           <object class="GtkButton" id="searchBut">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="image">search</property>
             <signal name="clicked" handler="on_searchBut_clicked" swapped="no"/>
@@ -271,7 +259,7 @@
         <child>
           <object class="GtkButton" id="settingBut">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="image">settings</property>
             <signal name="clicked" handler="on_settingBut_clicked" swapped="no"/>
@@ -1248,7 +1236,7 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                             <property name="halign">start</property>
                                             <property name="margin_top">5</property>
                                             <property name="margin_bottom">5</property>
-                                            <property name="label" translatable="yes">Releated</property>
+                                            <property name="label" translatable="yes">Related</property>
                                             <attributes>
                                               <attribute name="weight" value="bold"/>
                                               <attribute name="size" value="11000"/>
@@ -1261,96 +1249,13 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkBox" id="releateds">
+                                          <object class="GtkBox" id="relateds">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="hexpand">True</property>
                                             <property name="spacing">5</property>
                                             <child>
-                                              <object class="GtkButton" id="prevRel">
-                                                <property name="height_request">60</property>
-                                                <property name="visible">True</property>
-                                                <property name="sensitive">False</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="receives_default">True</property>
-                                                <property name="valign">center</property>
-                                                <property name="margin_top">5</property>
-                                                <property name="margin_bottom">5</property>
-                                                <property name="hexpand">True</property>
-                                                <property name="vexpand">True</property>
-                                                <property name="border_width">0</property>
-                                                <property name="image">prev</property>
-                                                <property name="relief">none</property>
-                                                <signal name="clicked" handler="prev_rel" swapped="no"/>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">0</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkBox" id="rel1">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="hexpand">True</property>
-                                                <property name="orientation">vertical</property>
-                                                <child>
-                                                  <object class="GtkImage" id="reli1">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <property name="stock">gtk-missing-image</property>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">False</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">0</property>
-                                                  </packing>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkButton" id="nam_lab1">
-                                                    <property name="label" translatable="yes">Name</property>
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <property name="receives_default">True</property>
-                                                    <property name="margin_top">5</property>
-                                                    <property name="margin_bottom">5</property>
-                                                    <property name="relief">none</property>
-                                                    <signal name="clicked" handler="on_go_album" swapped="no"/>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">False</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">1</property>
-                                                  </packing>
-                                                </child>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">1</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkButton" id="nextRel">
-                                                <property name="height_request">60</property>
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="receives_default">True</property>
-                                                <property name="valign">center</property>
-                                                <property name="margin_top">5</property>
-                                                <property name="margin_bottom">5</property>
-                                                <property name="hexpand">True</property>
-                                                <property name="vexpand">True</property>
-                                                <property name="image">nex</property>
-                                                <property name="relief">none</property>
-                                                <signal name="clicked" handler="next_rel" swapped="no"/>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">3</property>
-                                              </packing>
+                                              <placeholder/>
                                             </child>
                                           </object>
                                           <packing>
