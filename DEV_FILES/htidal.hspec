@@ -16,6 +16,8 @@ priority = 0
 depends = ${misc:Depends}
 	${python3:Depends}
 	python3-gi
+	python3-numpy
+	python3-pil
 	bash (>= 4.4-5)
 	python3-tidalapi (>= 0.7)
 	python3-srt

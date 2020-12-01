@@ -9,6 +9,8 @@ gi.require_version('Gst', '1.0')
 from gi.repository import Gtk, Gst, GLib, Gio, GdkPixbuf, Gdk
 from getpass import getpass
 from mediafile import MediaFile
+import numpy as np
+from PIL import Image, ImageDraw
 
 class GUI:
     def __init__(self):
@@ -228,8 +230,11 @@ class GUI:
             self.pause()
 
     def on_key(self, widget, key):
-        if key.keyval == 32 and self.url:
-            self.on_playBut_clicked(0)
+        try:
+            if key.keyval == 32 and self.url:
+                self.on_playBut_clicked(0)
+        except:
+            pass
 
     def on_searchBut_clicked(self, button):
         self.expanded = False
@@ -250,7 +255,7 @@ class GUI:
                     iType = 'album'
                 except:
                     iType = 'playlist'
-        print(f'Type is: {iType}')
+        # print(f'Type is: {iType}')
         return iType
 
     def on_searchItem_clicked(self, button):
@@ -352,8 +357,8 @@ class GUI:
                 self.cleaner(i.get_children())
             qld = futures.ThreadPoolExecutor(max_workers=4)
             qld.submit(self.backer)
-            time.sleep(0.1)
-            window.show_all()
+            time.sleep(0.2)
+            # window.show_all()
             # self.seClean()
 
     def cleaner(self, lis):
@@ -365,8 +370,11 @@ class GUI:
 
     def constructor(self, targetParent, items, btn):
         self.inFav = False
-        if items == []:
+        if items == [] or items == None or items == [None] or items == "":
             print(f'Not in this category {btn}')
+            for i in self.s_label:
+                if btn in Gtk.Buildable.get_name(i):
+                    i.hide()
         else:
             if targetParent == self.boxMore:
                 moreBox = Gtk.Box.new(1, 10)
@@ -557,7 +565,7 @@ class GUI:
                 target = f'/home/{user}/Music/htidal/snapshots/{name}/{track}.{self.ftype}'
             # elif tpe == 'video':
             #     target = f'/home/{user}/Music/htidal/videos/{track}.{self.ftype}'
-            dlDir[file_name] = {'size' : file_size, 'url' : url, 'track' : track, 'artist' : item.artist.name, 'album' : item.album.name, 'year' : item.tidal_release_date.strftime("%Y"), 'target' : target.replace(' ', "\ ").replace('(', '').replace(')', '')}
+            dlDir[file_name] = {'size' : file_size, 'url' : url, 'track' : track, 'artist' : item.artist.name, 'album' : item.album.name, 'year' : item.album.release_date.strftime("%Y"), 'target' : target.replace(' ', "\ ").replace('(', '').replace(')', '')}
             self.tot_size += file_size
             i += 1
         print(dlDir)
@@ -1255,18 +1263,32 @@ class GUI:
                     nam = f"icons/album.png"
             coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, int(self.w/2.4), int(self.h/1.4), True)
             tg = GLib.idle_add(self.trackCover.set_from_pixbuf, coverBuf)
-        elif where == 'album':
-            try:
-                pic = something.image(320)
-                response = urllib.request.urlopen(pic)
-                input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
-                coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 190, 190, True, None)
-            except:
-                coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(f"icons/{self.get_type(something)}.png", 190, 190, True)
-            tg = GLib.idle_add(self.alb_cover.set_from_pixbuf, coverBuf)
-            # self.relepo = 0
+        # elif where == 'album':
+        #     if self.get_type(something) == "artist":
+        #         nam = f"/tmp/htidal/thumbnails/{something.id}_circle.png"
+        #     else:
+        #         nam = f"/tmp/htidal/thumbnails/{something.id}"
+        #     if os.path.exists(nam):
+        #         pass
+        #     else:
+        #         try:
+        #             pic = something.image(320)
+        #             response = urllib.request.urlopen(pic)
+        #             with open(nam, "wb") as img:
+        #                 img.write(response.read())
+        #             if self.get_type(something) == "artist":
+        #                 self.circler(nam)
+        #             # input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None)
+        #             # coverBuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(input_stream, 190, 190, True, None)
+        #         except:
+        #             nam = f"icons/{self.get_type(something)}.png"
+        #             # coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(f"icons/{self.get_type(something)}.png", 190, 190, True)
+        #     tg = GLib.idle_add(self.alb_cover.set_from_pixbuf, coverBuf)
         elif where == 'search':
-            nam = f"/tmp/htidal/thumbnails/{something.id}"
+            if self.get_type(something) == "artist":
+                nam = f"/tmp/htidal/thumbnails/{something.id}_circle.png"
+            else:
+                nam = f"/tmp/htidal/thumbnails/{something.id}"
             if os.path.exists(nam):
                 pass
             else:
@@ -1275,13 +1297,28 @@ class GUI:
                     response = urllib.request.urlopen(pic)
                     with open(nam, "wb") as img:
                         img.write(response.read())
+                    if self.get_type(something) == "artist":
+                        self.circler(nam)
                 except:
                     nam = f"icons/{self.get_type(something)}.png"
-            if widget.get_margin_bottom() == 10:
+            if widget == self.alb_cover:
+                coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, 190, 190, True)
+            elif widget.get_margin_bottom() == 10:
                 coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, 70, 70, True)
             else:
                 coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, 150, 150, True)
             tg = GLib.idle_add(widget.set_from_pixbuf, coverBuf)
+
+    def circler(self, nam):
+        img = Image.open(nam).convert("RGB")
+        npImage = np.array(img)
+        h, w = img.size
+        alpha = Image.new('L', img.size,0)
+        draw = ImageDraw.Draw(alpha)
+        draw.pieslice([0,0,h,w],0,360,fill=255)
+        npAlpha = np.array(alpha)
+        npImage = np.dstack((npImage,npAlpha))
+        Image.fromarray(npImage).save(nam)
 
     def on_expand_clicked(self, button):
         self.tree.set_cursor(self.relPos)
@@ -1518,9 +1555,9 @@ class GUI:
                 self.exLab.set_label("Related")
             if playlistLoc != "myList":
                 self.fLab.set_label(state)
-                ld_cov.submit(self.load_cover, where='album', something=playlistLoc)
+                ld_cov.submit(self.load_cover, where='search', something=playlistLoc, widget=self.alb_cover)
             else:
-                ld_cov.submit(self.load_cover, where='album', something=self.allPlaylist[allPos])
+                ld_cov.submit(self.load_cover, where='search', something=self.allPlaylist[allPos], widget=self.alb_cover)
     def play(self):
         print("Play")
         self.res = True
