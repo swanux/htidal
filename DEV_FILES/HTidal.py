@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import tidalapi, time, gettext, locale, keyring, gi, subprocess, re, sys, os, threading, urllib, srt, datetime, webbrowser, random, requests, dbus, dbus.mainloop.glib, dbus.service, cairo, math
-from configparser import ConfigParser
+import time, gettext, locale, gi, subprocess, re, sys, os, threading, urllib, srt, datetime, webbrowser, random, requests, dbus, dbus.mainloop.glib, dbus.service
+# from configparser import ConfigParser
+# import tidalapi
+# import keyring
+from openTIDAL import ffi, lib
 from concurrent import futures
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gst', '1.0')
 from gi.repository import Gtk, Gst, GLib, Gio, GdkPixbuf, Gdk
-from getpass import getpass
+# from getpass import getpass
 from mediafile import MediaFile
 import numpy as np
 from PIL import Image, ImageDraw
@@ -31,8 +34,9 @@ class GUI:
         # self.seekingLyr = False
         self.seekBack = False
         self.playlist = []
-        self.builder.get_object('em_lab').set_label(emailC)
-        self.builder.get_object('qual_combo').set_active(int(qualityC))
+        # use = lib.get_user()
+        # self.builder.get_object('em_lab').set_label(ffi.string(use.email))
+        # self.builder.get_object('qual_combo').set_active(int(qualityC))
         self.allPlaylist = ''
         self.expanded = False
         self.position = 0
@@ -182,10 +186,10 @@ class GUI:
                     print('Pause error')
 
     def on_req_clicked(self, button):
-        webbrowser.open_new("https://github.com/swanux/htidal_db/issues/new?assignees=swanux&labels=enhancement&template=custom.md&title=Lyrics+request")
+        webbrowser.open_new_tab("https://github.com/swanux/htidal_db/issues/new?assignees=swanux&labels=enhancement&template=custom.md&title=Lyrics+request")
     
     def on_fb_clicked(self, button):
-        webbrowser.open_new("https://swanux.github.io/feedbacks.html")
+        webbrowser.open_new_tab("https://swanux.github.io/feedbacks.html")
 
     def on_main_delete_event(self, window, e):
         # Getting the window position
@@ -205,6 +209,7 @@ class GUI:
         if res == Gtk.ResponseType.YES:                             # if yes ...
             print('OK pressed')
             dialogWindow.destroy()
+            lib.cleanup()
             try:
                 self.mainloop.quit()
             except:
@@ -241,43 +246,52 @@ class GUI:
         child = self.builder.get_object("search_box")
         GLib.idle_add(stack.set_visible_child, child)
     
-    def get_type(self, item):
-        try:
-            item.audio_quality
-            iType = 'track'
-        except:
-            try:
-                item.get_top_tracks(limit=1, offset=0)
-                iType = 'artist'
-            except:
-                try:
-                    item.cover
-                    iType = 'album'
-                except:
-                    iType = 'playlist'
-        # print(f'Type is: {iType}')
-        return iType
+    # def get_type(self, item):
+    #     try:
+    #         item.audio_quality
+    #         iType = 'track'
+    #     except:
+    #         try:
+    #             item.get_top_tracks(limit=1, offset=0)
+    #             iType = 'artist'
+    #         except:
+    #             try:
+    #                 item.cover
+    #                 iType = 'album'
+    #             except:
+    #                 iType = 'playlist'
+    #     # print(f'Type is: {iType}')
+    #     return iType
 
     def on_searchItem_clicked(self, button):
         btn = Gtk.Buildable.get_name(button)
         print(btn)
+        lis = []
         if 's_top' in btn:
             item = self.query['top_hit']
         elif 's_track' in btn:
-            lis = self.query['tracks'][::-1]
+            for i in reversed(self.query['tracks']):
+                lis.append(i)
             item = lis[int(re.findall(r'\d+', btn)[0])]
         elif 's_art' in btn:
-            lis = self.query['artists'][::-1]
+            for i in reversed(self.query['artists']):
+                lis.append(i)
             item = lis[int(re.findall(r'\d+', btn)[0])]
         elif 's_album' in btn:
-            lis = self.query['albums'][::-1]
+            for i in reversed(self.query['albums']):
+                lis.append(i)
             item = lis[int(re.findall(r'\d+', btn)[0])]
         elif 's_playl' in btn:
-            lis = self.query['playlists'][::-1]
+            for i in reversed(self.query['playlists']):
+                lis.append(i)
             item = lis[int(re.findall(r'\d+', btn)[0])]
-        iType = self.get_type(item)
-        if iType == 'artist':
+        # print(lis)
+        # print(item)
+        iType = item["type"]
+        print(iType)
+        if iType == 'ARTISTS' or iType == 'ARTIST':
             self.artist = item
+            # print(self.artist)
             self.album = ''
             self.gen_playlist_view(name='album', playlistLoc=self.artist, again=self.albume, allPos='artistLoad')
             self.expanded = False
@@ -285,14 +299,15 @@ class GUI:
             self.builder.get_object("dlAlb").hide()
             self.prevSlide = stack.get_visible_child()
             self.cleaner(self.builder.get_object("relateds").get_children())
-            tmi = self.artist.get_albums(limit=None, offset=0)
+            # tmi = self.artist.get_albums(limit=None, offset=0)
+            tmi = self.assembleFactory("ar-al", "album", self.artist["id"])
             self.query['albums'] = tmi
-            self.constructor(self.builder.get_object("relateds"), tmi, 'album')
+            self.constructor(self.builder.get_object("relateds"), tmi, 'album', 'album')
             self.builder.get_object("general_bottom").show()
-        elif iType == 'album' or iType == 'playlist':
+        elif iType == 'ALBUMS' or iType == 'ALBUM' or iType == 'PLAYLISTS' or iType == 'PLAYLIST':
             self.album = item
             self.artist = ''
-            if iType == 'album':
+            if iType == 'ALBUMS' or iType == 'ALBUM':
                 self.gen_playlist_view(name='album', playlistLoc=self.album, again=self.albume)
             else:
                 self.gen_playlist_view(name='album', playlistLoc=self.album, again=self.albume, allPos='playlistPlease')
@@ -300,25 +315,30 @@ class GUI:
             stack.set_visible_child(self.builder.get_object('scrollAlbum'))
             self.builder.get_object("dlAlb").show()
             self.prevSlide = stack.get_visible_child()
-            if iType == 'playlist':
+            if iType == 'PLAYLISTS' or iType == 'PLAYLIST':
                 print('hiding')
                 self.builder.get_object("general_bottom").hide()
             else:
                 print('showing')
                 self.cleaner(self.builder.get_object("relateds").get_children())
-                tmi = self.album.artist.get_albums(limit=None, offset=0)
+                tmi = self.assembleFactory("ar-al", "album", self.album["artId"])
                 self.query['albums'] = tmi
-                self.constructor(self.builder.get_object("relateds"), tmi, 'album')
+                self.constructor(self.builder.get_object("relateds"), tmi, 'album', 'album')
                 self.builder.get_object("general_bottom").show()
-        elif iType == 'track':
+        elif iType == 'TRACKS' or iType == 'TRACK':
             self.gen_playlist_view(name='playlistPlayer', playlistLoc=item, again=self.playlistPlayer, allPos='radio')
 
     def backer(self):
-        self.constructor(self.boxList[4], [self.query['top_hit']], 'top')
-        self.constructor(self.boxList[0], self.query['tracks'], 'track')
-        self.constructor(self.boxList[1], self.query['artists'], 'artist')
-        self.constructor(self.boxList[2], self.query['albums'], 'album')
-        self.constructor(self.boxList[3], self.query['playlists'], 'playlist')
+        if self.query["top_hit"][0]["type"] == "TRACK":
+            self.constructor(self.boxList[4], self.query['top_hit'], 'top', 'track')
+        elif self.query["top_hit"][0]["type"] == "ARTIST":
+            self.constructor(self.boxList[4], self.query['top_hit'], 'top', 'artist')
+        else:
+            self.constructor(self.boxList[4], self.query['top_hit'], 'top', 'top')
+        self.constructor(self.boxList[0], self.query['tracks'], 'track', 'track')
+        self.constructor(self.boxList[1], self.query['artists'], 'artist', 'artist')
+        self.constructor(self.boxList[2], self.query['albums'], 'album', 'album')
+        self.constructor(self.boxList[3], self.query['playlists'], 'playlist', 'playlist')
     
     # def seClean(self):
     #     if self.query['tracks'] == []:
@@ -352,13 +372,50 @@ class GUI:
             for i in self.boxList:
                 self.cleaner(i.get_children())
         else:
-            self.query = self.session.search(txt, models=[tidalapi.artist.Artist, tidalapi.album.Album, tidalapi.media.Track, tidalapi.playlist.Playlist], limit=20, offset=0)
+            # self.query = self.session.search(txt, models=[tidalapi.artist.Artist, tidalapi.album.Album, tidalapi.media.Track, tidalapi.playlist.Playlist], limit=20, offset=0)
+            Tquery = lib.get_search(txt.encode("utf-8"), 14)
+            # print(ffi.string(Tquery.albums.title[0]).decode("utf-8"))
+            self.query = {}
+            self.query["artists"] = []
+            self.query["albums"] = []
+            self.query["playlists"] = []
+            self.query["tracks"] = []
+
+            self.query["artists"] = self.assembleFactory("search", "artist", Tquery.artists)
+            self.query["albums"] = self.assembleFactory("search", "album", Tquery.albums)
+            self.query["playlists"] = self.assembleFactory("search", "playlist", Tquery.playlists)
+            self.query["tracks"] = self.assembleFactory("search", "track", Tquery.tracks)
+            print(self.query["albums"])
+            # for i in range(Tquery.artists.arraySize):
+            #     self.query["artists"].append({"title" : ffi.string(Tquery.artists.name[i]).decode("utf-8"), "id" : Tquery.artists.id[i], "cover" : ffi.string(Tquery.artists.picture[i]).decode("utf-8"), "type" : "ARTISTS"})
+            # # for i in range(Tquery.albums.arraySize):
+            # #     self.query["albums"].append({"title" : ffi.string(Tquery.albums.title[i]).decode("utf-8"), "id" : Tquery.albums.id[i], "cover" : ffi.string(Tquery.albums.cover[i]).decode("utf-8"), "type" : "ALBUMS"})
+            # # print(self.query["albums"])
+            # # print("##########################################################")
+            # for i in range(Tquery.playlists.arraySize):
+            #     self.query["playlists"].append({"title" : ffi.string(Tquery.playlists.title[i]).decode("utf-8"), "id" : ffi.string(Tquery.playlists.uuid[i]).decode("utf-8"), "cover" : ffi.string(Tquery.playlists.squareImage[i]).decode("utf-8"), "type" : "PLAYLISTS"})
+            # for i in range(Tquery.tracks.arraySize):
+            #     self.query["tracks"].append({"title" : ffi.string(Tquery.tracks.title[i]).decode("utf-8"), "id" : Tquery.tracks.id[i], "cover" : ffi.string(Tquery.tracks.cover[i]).decode("utf-8"), "type" : "TRACKS"})
+            tht = ffi.string(Tquery.topHitType).decode("utf-8")
+            if tht == "ALBUMS":
+                # self.query["top_hit"] = {"title" : ffi.string(Tquery.topAlbum.title[0]).decode("utf-8"), "id" : Tquery.topAlbum.id[0], "cover" : ffi.string(Tquery.topAlbum.cover[0]).decode("utf-8"), "type" : tht}
+                self.query["top_hit"] = self.assembleFactory("search", "album", Tquery.topAlbum)
+            elif tht == "PLAYLISTS":
+                # self.query["top_hit"] = {"title" : ffi.string(Tquery.topPlaylist.title[0]).decode("utf-8"), "id" : ffi.string(Tquery.topPlaylist.uuid[0]).decode("utf-8"), "cover" : ffi.string(Tquery.topPlaylist.squareImage[0]).decode("utf-8"), "type" : tht}
+                self.query["top_hit"] = self.assembleFactory("search", "playlist", Tquery.topPlaylist)
+            elif tht == "ARTISTS":
+                # self.query["top_hit"] = {"title" : ffi.string(Tquery.topArtist.name[0]).decode("utf-8"), "id" : Tquery.topArtist.id[0], "cover" : ffi.string(Tquery.topArtist.picture[0]).decode("utf-8"), "type" : tht}
+                self.query["top_hit"] = self.assembleFactory("search", "artist", Tquery.topArtist)
+            elif tht == "TRACKS":
+                # self.query["top_hit"] = {"title" : ffi.string(Tquery.topTrack.title[0]).decode("utf-8"), "id" : Tquery.topTrack.id[0], "cover" : ffi.string(Tquery.topTrack.cover[0]).decode("utf-8"), "type" : tht}
+                self.query["top_hit"] = self.assembleFactory("search", "track", Tquery.topTrack)
             for i in self.boxList:
                 self.cleaner(i.get_children())
+            window.show_all()
             qld = futures.ThreadPoolExecutor(max_workers=4)
             qld.submit(self.backer)
             time.sleep(0.2)
-            # window.show_all()
+            # 
             # self.seClean()
 
     def cleaner(self, lis):
@@ -368,9 +425,10 @@ class GUI:
             for i in lis:
                 i.destroy()
 
-    def constructor(self, targetParent, items, btn):
+    def constructor(self, targetParent, items, btn, iType):
         self.inFav = False
-        if items == [] or items == None or items == [None] or items == "":
+        # if items == [] or items == None or items == [None] or items == "":
+        if len(items) == 0:
             print(f'Not in this category {btn}')
             for i in self.s_label:
                 if btn in Gtk.Buildable.get_name(i):
@@ -385,7 +443,22 @@ class GUI:
                 moreGrid.set_can_focus(False)
             zed = 0
             prev = None
+            # print(items)
             for item in reversed(items):
+                # print(item)
+                if len(items) == 1:
+                    ITEM = items[0]
+                # elif type(item) == int:
+                #     ITEM = items[item]
+                else:
+                    ITEM = item
+                # print(ITEM)
+                # print(ITEM["title"])
+                # print(ITEM["id"])
+                # if iType == "track":
+                #     ITEM = lib.get_track(int(item))
+                # print(ffi.string(ITEM.title[0]).decode("utf-8"))
+                # print(item)
                 if targetParent == self.boxMore:
                     subBox = Gtk.Box.new(0, 10)
                 else:
@@ -396,15 +469,15 @@ class GUI:
                 tmpLab = namBut.get_child()
                 tmpLab.set_ellipsize(3)
                 if targetParent == self.boxMore:
-                    tmpLab.set_markup('<big><b>'+item.name.replace('&', 'and')+'</b></big>')
+                    tmpLab.set_markup('<big><b>'+ITEM["title"].replace('&', 'and')+'</b></big>')
                 else:
-                    tmpLab.set_label(item.name.replace('&', 'and'))
+                    tmpLab.set_label(ITEM["title"].replace('&', 'and'))
                 tmpLab.set_halign(Gtk.Align(1))
                 tmpLab.set_valign(Gtk.Align(3))
                 namBut.set_relief(Gtk.ReliefStyle.NONE)
                 imaje = Gtk.Image.new()
                 evBox = Gtk.EventBox.new()
-                iType = "general"
+                # iType = "general"
                 if btn == 'otAlBut':
                     Gtk.Buildable.set_name(namBut, f"s_album{zed}")
                     Gtk.Buildable.set_name(evBox, f"img_s_album{zed}")
@@ -423,7 +496,6 @@ class GUI:
                 elif btn == 'top':
                     Gtk.Buildable.set_name(namBut, f"s_top")
                     Gtk.Buildable.set_name(evBox, f"img_s_top{zed}")
-                    iType = self.get_type(item)
                 else:
                     Gtk.Buildable.set_name(namBut, f"s_art{zed}")
                     Gtk.Buildable.set_name(evBox, f"img_s_art{zed}")
@@ -450,10 +522,13 @@ class GUI:
                 prev = subBox
                 ld_cov = futures.ThreadPoolExecutor(max_workers=4)
                 if btn == 'track' or iType == 'track':
-                    ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item.album)
+                    ld_cov.submit(self.load_cover, where='search', widget=imaje, something=ITEM, iType=iType)
                 else:
-                    ld_cov.submit(self.load_cover, where='search', widget=imaje, something=item)
-                zed += 1
+                    ld_cov.submit(self.load_cover, where='search', widget=imaje, something=ITEM, iType=iType)
+                if len(items) == 1:
+                    break
+                else:
+                    zed += 1
             yetScroll = Gtk.ScrolledWindow()
             yetScroll.set_can_focus(False)
             yetScroll.set_vexpand(True)
@@ -466,10 +541,11 @@ class GUI:
                 yetScroll.add(moreGrid)
             targetParent.pack_start(yetScroll, True, True, 0)
             yetScroll.show_all()
+            # print("After")
 
     def on_git_link_clicked(self, button):
         # open project page in browser
-        webbrowser.open_new("https://swanux.github.io/htidal.html")
+        webbrowser.open_new_tab("https://swanux.github.io/htidal.html")
 
     def on_go_more(self, button):
         self.cleaner(self.boxMore.get_children())
@@ -663,9 +739,9 @@ class GUI:
         stack.set_visible_child(self.builder.get_object('scrollSet'))
 
     def on_signOut_clicked(self, button):
-        self.session = tidalapi.Session(self.c)
+        # self.session = tidalapi.Session(self.c)
         os.system(f'rm /home/{user}/.config/htidal/htidal.ini')
-        self.bigStack.set_visible_child(self.builder.get_object('loginBox'))
+        # self.bigStack.set_visible_child(self.builder.get_object('loginBox'))
 
     def on_event1_button_press_event(self, event, button):
         print('eventhere')
@@ -673,12 +749,12 @@ class GUI:
     def on_event2_button_press_event(self, event, button):
         print('event2here')
 
-    def on_wr_but_clicked(self, button):
-        nQuality = self.builder.get_object('qual_combo').get_active()
-        parser.set('misc', 'quality', str(nQuality))
-        file = open(f"/home/{user}/.config/htidal/htidal.ini", "w+")
-        parser.write(file)
-        file.close()
+    # def on_wr_but_clicked(self, button):
+    #     nQuality = self.builder.get_object('qual_combo').get_active()
+    #     parser.set('misc', 'quality', str(nQuality))
+    #     file = open(f"/home/{user}/.config/htidal/htidal.ini", "w+")
+    #     parser.write(file)
+    #     file.close()
 
     def on_fav_gen(self, button):
         self.cleaner(self.boxMore.get_children())
@@ -703,7 +779,7 @@ class GUI:
             self.query['albums'] = items
             btn = "album"
         stack.set_visible_child(self.boxMore)
-        self.constructor(self.boxMore, items, btn)
+        self.constructor(self.boxMore, items, btn, btn)
         self.inFav = True
 
     def on_favs_clicked(self, button):
@@ -924,8 +1000,11 @@ class GUI:
 
     def on_create(self, button):
         name = self.builder.get_object("create_entry").get_text()
-        tidalapi.user.LoggedInUser(self.session, self.userID).create_playlist(name, '')
-        self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+        # tidalapi.user.LoggedInUser(self.session, self.userID).create_playlist(name, '')
+        lib.create_playlist(name.encode("utf-8"))
+        # self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+        self.favver(["playlist"])
+        self.allPlaylist = self.favPlys
         self.on_myLists_clicked("")
 
     def all_row(self, widget, row, col):
@@ -944,33 +1023,43 @@ class GUI:
         else:
             allPos = self.allTree.get_selection().get_selected_rows()[1][0][0]
             playlist = self.allPlaylist[allPos]
-            local = tidalapi.playlist.UserPlaylist(self.session, playlist.id)
-            local.add([self.whatToAdd.id])
-            self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+            # local = tidalapi.playlist.UserPlaylist(self.session, playlist.id)
+            # local.add([self.whatToAdd.id])
+            lib.add_playlist_item(playlist.id.encode("utf-8"), self.whatToAdd.id)
+            # self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+            self.favver(["playlist"])
+            self.allPlaylist = self.favPlys
             stack.set_visible_child(self.prevTmp)
             self.adding = False
 
     def rem_fav(self, item):
         if 's_track' in self.btn:
             item = self.query['tracks'][int(re.findall(r'\d+', self.btn)[0])]
-            self.favourite.remove_track(item.id)
+            # self.favourite.remove_track(item.id)
+            lib.delete_favorite_track(item.id)
             # self.favs = self.favourite.tracks()
             self.favs.remove(item)
             self.on_fav_gen("track")
         elif 's_art' in self.btn:
             item = self.query['artists'][int(re.findall(r'\d+', self.btn)[0])]
-            self.favourite.remove_artist(item.id)
-            self.favArts = self.favourite.artists()
+            # self.favourite.remove_artist(item.id)
+            lib.delete_favorite_artist(item.id)
+            # self.favArts = self.favourite.artists()
+            self.favArts.remove(item)
             self.on_fav_gen("art")
         elif 's_album' in self.btn:
             item = self.query['albums'][int(re.findall(r'\d+', self.btn)[0])]
-            self.favourite.remove_album(item.id)
-            self.favAlbs = self.favourite.albums()
+            # self.favourite.remove_album(item.id)
+            lib.delete_favorite_album(item.id)
+            # self.favAlbs = self.favourite.albums()
+            self.favAlbs.remove(item)
             self.on_fav_gen("album")
         elif 's_playl' in self.btn:
             item = self.query['playlists'][int(re.findall(r'\d+', self.btn)[0])]
-            self.favourite.remove_playlist(item.id)
-            self.favPlys = self.favourite.playlists()
+            # self.favourite.remove_playlist(item.id)
+            lib.delete_favorite_playlist(item.id)
+            # self.favPlys = self.favourite.playlists()
+            self.favPlys.remove(item)
             self.on_fav_gen("list")
 
     def image_click(self, widget, event):
@@ -1067,9 +1156,12 @@ class GUI:
     
     def del_pyl(self, itme):
         this = self.allTree.get_selection().get_selected_rows()[1][0][0]
-        local = tidalapi.playlist.UserPlaylist(self.session, self.allPlaylist[self.allStore[this][1]].id)
-        local.delete()
-        self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+        # local = tidalapi.playlist.UserPlaylist(self.session, self.allPlaylist[self.allStore[this][1]].id)
+        # local.delete()
+        lib.delete_playlist(self.allPlaylist[self.allStore[this][1]].id)
+        # self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+        self.favver(["playlist"])
+        self.allPlaylist = self.favPlys
         self.gen_playlist_view(name="all", again=self.all)
 
     def add_pl(self, item):
@@ -1082,7 +1174,8 @@ class GUI:
         this = self.albumTree.get_selection().get_selected_rows()[1][0][0]
         local = tidalapi.playlist.UserPlaylist(self.session, self.album.id)
         local.remove_by_index(this)
-        self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+        self.favver(["playlist"])
+        self.allPlaylist = self.favPlys
         self.album = self.allPlaylist[self.allPos]
         self.gen_playlist_view(name='album', playlistLoc="myList", again=self.albume, allPos=self.allPos)
 
@@ -1244,18 +1337,21 @@ class GUI:
         except:
             pass
 
-    def load_cover(self, where='', widget='', something=''):
+    def load_cover(self, where='', widget='', something='', iType=''):
         # print("Load cover")
         self.w, self.h = window.get_size()
         if where == '':
-            album = self.playlist[self.tnum].album
-            nam = f"/tmp/htidal/thumbnails/{album.id}"
+            # album = self.playlist[self.tnum]["cover"]
+            Tid = self.playlist[self.tnum]["id"]
+            nam = f"/tmp/htidal/thumbnails/{Tid}"
             if os.path.exists(nam):
                 print("In cache")
                 pass
             else:
                 try:
-                    pic = album.image(640)
+                    # pic = album.image(640)
+                    Tpic = self.playlist[self.tnum]["cover"].replace("-", "/")
+                    pic = f"https://resources.tidal.com/images/{Tpic}/320x320.jpg"
                     response = urllib.request.urlopen(pic)
                     with open(nam, "wb") as img:
                         img.write(response.read())
@@ -1285,22 +1381,27 @@ class GUI:
         #             # coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(f"icons/{self.get_type(something)}.png", 190, 190, True)
         #     tg = GLib.idle_add(self.alb_cover.set_from_pixbuf, coverBuf)
         elif where == 'search':
-            if self.get_type(something) == "artist":
-                nam = f"/tmp/htidal/thumbnails/{something.id}_circle.png"
+            Tid = something["id"]
+            if iType == "artist":
+                nam = f"/tmp/htidal/thumbnails/{Tid}_circle.png"
             else:
-                nam = f"/tmp/htidal/thumbnails/{something.id}"
+                nam = f"/tmp/htidal/thumbnails/{Tid}"
             if os.path.exists(nam):
                 pass
             else:
                 try:
-                    pic = something.image(320)
+                    # pic = something.image(320)
+                    # if iType == "track":
+                    #     Tpic = ffi.string(lib.get_album(lib.get_track(something).albumId[0]).cover[0]).decode("utf-8").replace("-", "/")
+                    Tpic = something["cover"].replace("-", "/")
+                    pic = f"https://resources.tidal.com/images/{Tpic}/320x320.jpg"
                     response = urllib.request.urlopen(pic)
                     with open(nam, "wb") as img:
                         img.write(response.read())
-                    if self.get_type(something) == "artist":
+                    if iType == "artist":
                         self.circler(nam)
                 except:
-                    nam = f"icons/{self.get_type(something)}.png"
+                    nam = f"icons/{iType}.png"
             if widget == self.alb_cover:
                 coverBuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(nam, 190, 190, True)
             elif widget.get_margin_bottom() == 10:
@@ -1375,9 +1476,9 @@ class GUI:
                 self.on_next('clickModel')
         elif name == 'playlistPlayer':
             if allPos == 'albumLoad':
-                self.playlist = self.album.tracks()
+                self.playlist = self.assembleFactory("al-tr", "track", self.album["id"])
             elif allPos == 'artistLoad':
-                self.playlist = self.artist.get_top_tracks()
+                self.playlist = self.assembleFactory("top", "track", self.artist["id"])
             elif allPos == 'regen':
                 print('Regenerate only')
             elif allPos == 'radio':
@@ -1406,8 +1507,8 @@ class GUI:
             a = []
             il = []
             for i in range(len(playlistLoc)):
-                t.append(playlistLoc[i].name)
-                a.append(playlistLoc[i].artist.name)
+                t.append(playlistLoc[i]["title"])
+                a.append(playlistLoc[i]["artist"])
                 il.append(i)
             GLib.idle_add(doapp)
             if not again:
@@ -1431,7 +1532,8 @@ class GUI:
             if allPos == 'radio':
               self.on_next('clickModel')
         elif name == "all":
-            self.allPlaylist = tidalapi.user.LoggedInUser(self.session, self.userID).playlists()
+            self.favver(["playlist"])
+            self.allPlaylist = self.favPlys
             playlistLoc = self.allPlaylist
             self.allStore = Gtk.ListStore(str, int)
             self.allTree.set_model(self.allStore)
@@ -1467,16 +1569,25 @@ class GUI:
             self.builder.get_object("otAlBut").show()
             self.builder.get_object("otArBut").show()
             if allPos == 'artistLoad':
-                albumLoc = playlistLoc.get_top_tracks()
+                # albumLoc = playlistLoc.get_top_tracks()
+                # print(playlistLoc)
+                albumLoc = self.assembleFactory("top", "track", playlistLoc["id"])
+                # print(albumLoc)
                 self.albumTracks = albumLoc
                 self.artiste = True
             elif playlistLoc == "myList":
                 self.artiste = False
-                albumLoc = self.allPlaylist[allPos].tracks()
+                # albumLoc = self.allPlaylist[allPos].tracks()ű
+                albumLoc = self.assembleFactory("pl-tr", "track", self.allPlaylist[allPos]["id"])
+                self.albumTracks = albumLoc
+            elif allPos == "playlistPlease":
+                self.artiste = False
+                albumLoc = self.assembleFactory("pl-tr", "track", playlistLoc["id"])
                 self.albumTracks = albumLoc
             else:
                 self.artiste = False
-                albumLoc = playlistLoc.tracks()
+                # albumLoc = playlistLoc.tracks()
+                albumLoc = self.assembleFactory("al-tr", "track", playlistLoc["id"])
                 self.albumTracks = albumLoc
             self.storeAlbum = Gtk.ListStore(str, str, int)
             self.albumTree.set_model(self.storeAlbum)
@@ -1488,8 +1599,8 @@ class GUI:
             a = []
             il = []
             for i in range(len(albumLoc)):
-                t.append(albumLoc[i].name)
-                a.append(albumLoc[i].artist.name)
+                t.append(albumLoc[i]["title"])
+                a.append(albumLoc[i]["artist"])
                 il.append(i)
             GLib.idle_add(doapp)
             if not again:
@@ -1509,9 +1620,9 @@ class GUI:
             self.albume = True
             ld_cov = futures.ThreadPoolExecutor(max_workers=4)
             if playlistLoc == "myList":
-                self.namer.set_label(self.allPlaylist[allPos].name)
+                self.namer.set_label(self.allPlaylist[allPos]["title"])
             else:
-                self.namer.set_label(playlistLoc.name)
+                self.namer.set_label(playlistLoc["title"])
             if allPos == 'artistLoad':
                 try:
                     self.dat_role.set_label(re.sub(r"[\(\[].*?[\)\]]", "", playlistLoc.get_bio()))
@@ -1521,32 +1632,32 @@ class GUI:
                 # self.relList = playlistLoc.get_albums(limit=None, offset=0)
                 self.exLab.set_label("Albums")
                 for i in self.favArts:
-                    if playlistLoc.id == i.id:
+                    if playlistLoc["id"] == i["id"]:
                         state = 'Remove from Favourites'
                         break
                     else:
                         state = 'Add to Favourites'
             else:
                 if allPos == 'playlistPlease':
-                    self.dat_role.set_label(f"Creator: {playlistLoc.creator.name}")
+                    self.dat_role.set_label(playlistLoc["dur"])
                     for i in self.favPlys:
-                        if playlistLoc.id == i.id:
+                        if playlistLoc["id"] == i["id"]:
                             state = 'Remove from Favourites'
                             break
                         else:
                             state = 'Add to Favourites'
                 elif playlistLoc == 'myList':
                     self.treeType = "own"
-                    self.dat_role.set_label(f"Creator: {self.allPlaylist[allPos].creator.name}")
+                    self.dat_role.set_label(self.allPlaylist[allPos].creator.name)
                     self.fLab.hide()
                     self.builder.get_object("otAlBut").hide()
                     self.builder.get_object("otArBut").hide()
                 else:
-                    self.dat_role.set_label(str(playlistLoc.release_date).split(' ')[0])
+                    self.dat_role.set_label(playlistLoc["date"])
                     # self.builder.get_object("prevRel").set_sensitive(False)
                     # self.relList = playlistLoc.artist.get_albums(limit=None, offset=0)
                     for i in self.favAlbs:
-                        if playlistLoc.id == i.id:
+                        if playlistLoc["id"] == i["id"]:
                             state = 'Remove from Favourites'
                             break
                         else:
@@ -1652,133 +1763,200 @@ class GUI:
             os.system(f'zenity --warning --text={offtxt} --ellipsize')
             raise SystemExit
     
-    def on_remember_toggled(self, button, data=None):
-        self.rmbe = self.rem.get_active()
+    def authBrowse(self, button):
+        webbrowser.open_new_tab("https://link.tidal.com")
 
-    def favver(self):
+    # def on_remember_toggled(self, button, data=None):
+    #     self.rmbe = self.rem.get_active()
+
+    def helperFactory(self, Tproduct, typ, offset, product):
+        size = Tproduct.arraySize
+        print(size)
+        if typ == "track":
+            for i in range(size):
+                product.append({"title" : ffi.string(Tproduct.title[i]).decode("utf-8"), "cover" : ffi.string(Tproduct.cover[i]).decode("utf-8"), "id" : Tproduct.id[i], "artist" : ffi.string(Tproduct.artistName[i][0]).decode("utf-8"), "type" : typ.upper()})
+        elif typ == "artist":
+            for i in range(size):
+                product.append({"title" : ffi.string(Tproduct.name[i]).decode("utf-8"), "cover" : ffi.string(Tproduct.picture[i]).decode("utf-8"), "id" : Tproduct.id[i], "type" : typ.upper()})
+        elif typ == "album":
+            for i in range(size):
+                product.append({"title" : ffi.string(Tproduct.title[i]).decode("utf-8"), "cover" : ffi.string(Tproduct.cover[i]).decode("utf-8"), "id" : Tproduct.id[i], "artId" : Tproduct.artistId[i][0], "type" : typ.upper(), "date" : ffi.string(Tproduct.releaseDate[0]).decode("utf-8").split("T")[0]})
+        elif typ == "playlist":
+            for i in range(size):
+                product.append({"title" : ffi.string(Tproduct.title[i]).decode("utf-8"), "cover" : ffi.string(Tproduct.squareImage[i]).decode("utf-8"), "id" : ffi.string(Tproduct.uuid[i]).decode("utf-8"), "dur" : str(datetime.timedelta(seconds=Tproduct.duration[i])), "type" : typ.upper()})
+        return product
+
+    def assembleFactory(self, method, typ, misc=0):
+        product = []
+        offset = 0
+        limit = 100
+        while True:
+            if method == "fav":
+                if typ == "track":
+                    Tproduct = lib.get_favorite_tracks(limit, offset, "DATE".encode("utf-8"), "ASC".encode("utf-8"))
+                elif typ == "artist":
+                    Tproduct = lib.get_favorite_artist(limit, offset, "DATE".encode("utf-8"), "ASC".encode("utf-8"))
+                elif typ == "album":
+                    Tproduct = lib.get_favorite_album(limit, offset, "DATE".encode("utf-8"), "ASC".encode("utf-8"))
+                elif typ == "playlist":
+                    Tproduct = lib.get_favorite_playlist(int(limit/2), offset, "DATE".encode("utf-8"), "ASC".encode("utf-8"))
+            elif method == "top":
+                Tproduct = lib.get_artist_toptracks(int(misc), limit, offset)
+            elif method == "ar-al":
+                Tproduct = lib.get_artist_albums(int(misc), limit, offset)
+            elif method == "al-tr":
+                Tproduct = lib.get_album_items(int(misc), limit, offset)
+            elif method == "pl-tr":
+                Tproduct = lib.get_playlist_items(misc.encode("utf-8"), limit, offset)
+            elif method == "search":
+                print(misc)
+                Tproduct = misc
+            product = self.helperFactory(Tproduct, typ, offset, product)
+            time.sleep(0.1)
+            if Tproduct.arraySize != limit:
+                break
+            else:
+                offset += limit
+        return product
+
+    def favver(self, which):
         print('favving')
-        self.favs = self.favourite.tracks()
+        # self.favs = self.favourite.tracks()
+        if "track" in which:
+            self.favs = self.assembleFactory("fav", "track")
+        if "artist" in which:
+            self.favArts = self.assembleFactory("fav", "artist")
+        if "album" in which:
+            self.favAlbs = self.assembleFactory("fav", "album")
+        if "playlist" in which:
+            self.favPlys = self.assembleFactory("fav", "playlist")
+        # self.favArts = self.favourite.artists()
+        # self.favArts = lib.get_favorite_artist()
         time.sleep(0.2)
-        self.favArts = self.favourite.artists()
+        # self.favAlbs = self.favourite.albums()
+        # self.favArts = lib.get_favorite_album()
         time.sleep(0.2)
-        self.favAlbs = self.favourite.albums()
-        time.sleep(0.2)
-        self.favPlys = self.favourite.playlists()
+        # self.favPlys = self.favourite.playlists()
+        # self.favPlys = lib.get_favorite_playlist()
         # time.sleep(0.2)
         # self.favIds = self.favourite.videos()
 
-    def on_login(self, button, email=None, password=None):
-        global qualityC
-        if email == None and password == None:
-            email = self.emailEntry.get_text()
-            password = self.pwdEntry.get_text()
-            self.c = tidalapi.Config(tidalapi.Quality('LOSSLESS'))
-            parser.set('misc', 'quality', '0')
-            qualityC = '0'
-            self.builder.get_object('em_lab').set_label(email)
-        self.c = tidalapi.Config(tidalapi.Quality(qdict[qualityC]))
-        self.session = tidalapi.Session(self.c)
-        try:
-            self.session.login(email, password)
-            print("Login succesfull")
-            self.userID = self.session.user.id
-            # Favourites
-            self.favourite = tidalapi.user.Favorites(self.session, self.userID)
-            ldg = futures.ThreadPoolExecutor(max_workers=4)
-            ldg.submit(self.favver)
-            ### End
-            if confA == False and self.rmbe == True:
-                print("Config written")
-                parser.set('login', 'email', email)
-                os.system(f'mkdir -p /home/{user}/.config/htidal/')
-                file = open(f"/home/{user}/.config/htidal/htidal.ini", "w+")
-                parser.write(file)
-                file.close()
-                keyring.set_password('tidal', email, password)
-                print("Saved")
-            self.bigStack.set_visible_child(self.builder.get_object("box"))
-            stack.set_visible_child(self.builder.get_object("scrollHome"))
-            lis = futures.ThreadPoolExecutor(max_workers=4)
-            lis.submit(self.listener)
-        except:
-            print("Login failed")
-            os.system('zenity --warning --text="Invalid email address or password!" --ellipsize')
+    # def on_login(self, button, email=None, password=None):
+    #     global qualityC
+    #     if email == None and password == None:
+    #         email = self.emailEntry.get_text()
+    #         password = self.pwdEntry.get_text()
+    #         self.c = tidalapi.Config(tidalapi.Quality('LOSSLESS'))
+    #         parser.set('misc', 'quality', '0')
+    #         qualityC = '0'
+    #         self.builder.get_object('em_lab').set_label(email)
+    #     self.c = tidalapi.Config(tidalapi.Quality(qdict[qualityC]))
+    #     self.session = tidalapi.Session(self.c)
+    #     try:
+    #         self.session.login(email, password)
+    #         print("Login succesfull")
+    #         self.userID = self.session.user.id
+    #         # Favourites
+    #         self.favourite = tidalapi.user.Favorites(self.session, self.userID)
+            # ldg = futures.ThreadPoolExecutor(max_workers=4)
+            # ldg.submit(self.favver)
+    #         ### End
+    #         if confA == False and self.rmbe == True:
+    #             print("Config written")
+    #             parser.set('login', 'email', email)
+    #             os.system(f'mkdir -p /home/{user}/.config/htidal/')
+    #             file = open(f"/home/{user}/.config/htidal/htidal.ini", "w+")
+    #             parser.write(file)
+    #             file.close()
+    #             keyring.set_password('tidal', email, password)
+    #             print("Saved")
+    #         self.bigStack.set_visible_child(self.builder.get_object("box"))
+    #         stack.set_visible_child(self.builder.get_object("scrollHome"))
+            # lis = futures.ThreadPoolExecutor(max_workers=4)
+            # lis.submit(self.listener)
+    #     except:
+    #         print("Login failed")
+    #         os.system('zenity --warning --text="Invalid email address or password!" --ellipsize')
 
 
-class Setup:
-    def __init__(self):
-        print("Running Htidal...")
+# class Setup:
+#     def __init__(self):
+#         print("Running Htidal...")
 
-    def is_running(self, process):
-        try: #Linux/Unix
-            s = subprocess.Popen(["ps", "axw"],stdout=subprocess.PIPE)
-        except: #Windows
-            s = subprocess.Popen(["tasklist", "/v"],stdout=subprocess.PIPE)
-        for x in s.stdout:
-            if re.search(process, x):
-                return True
-        return False
+#     def is_running(self, process):
+#         try: #Linux/Unix
+#             s = subprocess.Popen(["ps", "axw"],stdout=subprocess.PIPE)
+#         except: #Windows
+#             s = subprocess.Popen(["tasklist", "/v"],stdout=subprocess.PIPE)
+#         for x in s.stdout:
+#             if re.search(process, x):
+#                 return True
+#         return False
 
-    def get_desktop_environment(self):
-        if sys.platform in ["win32", "cygwin"]:
-            return "windows"
-        elif sys.platform == "darwin":
-            return "mac"
-        else: #Most likely either a POSIX system or something not much common
-            desktop_session = os.environ.get("DESKTOP_SESSION")
-            if desktop_session is not None: #easier to match if we doesn't have  to deal with caracter cases
-                desktop_session = desktop_session.lower()
-                if desktop_session in ["gnome","unity", "cinnamon", "mate", "xfce4", "lxde", "fluxbox", 
-                                        "blackbox", "openbox", "icewm", "jwm", "afterstep","trinity", "kde", "ubuntu"]:
-                    return desktop_session
-                ## Special cases ##
-                elif "xubuntu" in desktop_session:
-                    return "xfce4"     
-                elif desktop_session.startswith("lubuntu"):
-                    return "lxde" 
-                elif desktop_session.startswith("pop"):
-                    return "gnome"
-                elif desktop_session.startswith("pantheon"):
-                    return "elementary"
-                elif desktop_session.startswith("kubuntu"): 
-                    return "kde"
-                elif desktop_session.startswith("budgie"): 
-                    return "budgie"
-                elif desktop_session.startswith("razor"): # e.g. razorkwin
-                    return "razor-qt"
-                elif desktop_session.startswith("wmaker"): # e.g. wmaker-common
-                    return "windowmaker"
-            else:
-                if os.environ.get('KDE_FULL_SESSION') == 'true':
-                    return "kde"
-                elif os.environ.get('GNOME_DESKTOP_SESSION_ID'):
-                    if not "deprecated" in os.environ.get('GNOME_DESKTOP_SESSION_ID'):
-                        return "gnome2"
-                else:
-                    return "unknown"
+#     def get_desktop_environment(self):
+#         if sys.platform in ["win32", "cygwin"]:
+#             return "windows"
+#         elif sys.platform == "darwin":
+#             return "mac"
+#         else: #Most likely either a POSIX system or something not much common
+#             desktop_session = os.environ.get("DESKTOP_SESSION")
+#             if desktop_session is not None: #easier to match if we doesn't have  to deal with caracter cases
+#                 desktop_session = desktop_session.lower()
+#                 if desktop_session in ["gnome","unity", "cinnamon", "mate", "xfce4", "lxde", "fluxbox", 
+#                                         "blackbox", "openbox", "icewm", "jwm", "afterstep","trinity", "kde", "ubuntu"]:
+#                     return desktop_session
+#                 ## Special cases ##
+#                 elif "xubuntu" in desktop_session:
+#                     return "xfce4"     
+#                 elif desktop_session.startswith("lubuntu"):
+#                     return "lxde" 
+#                 elif desktop_session.startswith("pop"):
+#                     return "gnome"
+#                 elif desktop_session.startswith("pantheon"):
+#                     return "elementary"
+#                 elif desktop_session.startswith("kubuntu"): 
+#                     return "kde"
+#                 elif desktop_session.startswith("budgie"): 
+#                     return "budgie"
+#                 elif desktop_session.startswith("razor"): # e.g. razorkwin
+#                     return "razor-qt"
+#                 elif desktop_session.startswith("wmaker"): # e.g. wmaker-common
+#                     return "windowmaker"
+#             else:
+#                 if os.environ.get('KDE_FULL_SESSION') == 'true':
+#                     return "kde"
+#                 elif os.environ.get('GNOME_DESKTOP_SESSION_ID'):
+#                     if not "deprecated" in os.environ.get('GNOME_DESKTOP_SESSION_ID'):
+#                         return "gnome2"
+#                 else:
+#                     return "unknown"
 
-    def keyringer(self):
-        kmode4 = keyring.backends.kwallet.DBusKeyringKWallet4()
-        kmode5 = keyring.backends.kwallet.DBusKeyring()
-        gmode = keyring.backends.SecretService.Keyring()
-        DE = self.get_desktop_environment()
-        if "kde" in DE or "qt" in DE:
-            kver = os.popen("plasma-desktop --version").read()
-            kver = kver.split("\n")
-            kver = kver[2].replace("Plasma Desktop Shell: ", "")
-            kver = kver.split(".")
-            if kver[0] == 4:
-                keyring.set_keyring(kmode4)
-            else:
-                keyring.set_keyring(kmode5)
-        else:
-            keyring.set_keyring(gmode)
+#     def keyringer(self):
+#         kmode4 = keyring.backends.kwallet.DBusKeyringKWallet4()
+#         kmode5 = keyring.backends.kwallet.DBusKeyring()
+#         gmode = keyring.backends.SecretService.Keyring()
+#         DE = self.get_desktop_environment()
+#         if "kde" in DE or "qt" in DE:
+#             kver = os.popen("plasma-desktop --version").read()
+#             kver = kver.split("\n")
+#             kver = kver[2].replace("Plasma Desktop Shell: ", "")
+#             kver = kver.split(".")
+#             if kver[0] == 4:
+#                 keyring.set_keyring(kmode4)
+#             else:
+#                 keyring.set_keyring(kmode5)
+#         else:
+#             keyring.set_keyring(gmode)
 
 
 if __name__ == "__main__":
-    qdict = {'0' : 'LOSSLESS', '1' : 'HIGH', '2' : 'LOW'}
+    # location = "/home/daniel/.config/htidal/persistent.json"
+    # libState = lib.init(location.encode("utf-8"))
+    # print(location)
+    # print(libState)
+    # qdict = {'0' : 'LOSSLESS', '1' : 'HIGH', '2' : 'LOW'}
     # Dev/Use mode
-    version = 'HTidal Beta 0.1 Snapshot 5'
+    version = 'HTidal Beta 0.2 Snapshot 1'
     if os.path.exists('/home/daniel/GitRepos/htidal'):
         fdir = "/home/daniel/GitRepos/htidal/DEV_FILES/"
         print(fdir)
@@ -1789,6 +1967,8 @@ if __name__ == "__main__":
         print(fdir)
         os.chdir(fdir)
         print('Running in production mode.')
+    # location = "/home/daniel/.config/htidal/persistent.json"
+    # libState = lib.init(location.encode("utf-8"))
     # Translate
     APP = "htidal"
     WHERE_AM_I = os.path.abspath(os.path.dirname(__file__))
@@ -1798,37 +1978,87 @@ if __name__ == "__main__":
     gettext.bindtextdomain(APP, LOCALE_DIR)
     gettext.textdomain(APP)
     gg = gettext.gettext
-    parser = ConfigParser()
+    # parser = ConfigParser()
     user = os.popen("who|awk '{print $1}'r").read()
     user = user.rstrip()
     user = user.split('\n')[0]
-    if os.path.exists(f"/home/{user}/.config/htidal/htidal.ini"):
+    location = f"/home/{user}/.config/htidal/persistent.json"
+    if os.path.exists(f"/home/{user}/.config/htidal/"):
         print('Configured already')
-        confA = True
-        parser.read(f"/home/{user}/.config//htidal/htidal.ini")
-        emailC = parser.get('login', 'email')
-        qualityC = parser.get('misc', 'quality')
     else:
         print("Not configured yet")
-        confA = False
-        emailC = ''
-        qualityC = '0'
-        parser.add_section('login')
-        parser.add_section('misc')
-        # os.system("./sfbknd htidal")
+        os.system(f"mkdir -p /home/{user}/.config/htidal/")
+    # if os.path.exists(f"/home/{user}/.config/htidal/htidal.ini"):
+    #     print('Configured already')
+    #     confA = True
+    #     parser.read(f"/home/{user}/.config//htidal/htidal.ini")
+    #     emailC = parser.get('login', 'email')
+    #     qualityC = parser.get('misc', 'quality')
+    # else:
+    #     print("Not configured yet")
+    #     confA = False
+    #     emailC = ''
+    #     qualityC = '0'
+    #     parser.add_section('login')
+    #     parser.add_section('misc')
+    #     # os.system("./sfbknd htidal")
     # GUI
     UI_FILE = "htidal.glade"
     Gst.init(None)
-    sp = Setup()
+    # sp = Setup()
     app = GUI()
-    sp.keyringer()
-    if confA:
-        pwd = keyring.get_password('tidal', emailC)
-        if pwd != None or pwd != "":
-            app.on_login(0, emailC, pwd)
+    # sp.keyringer()
+    libState = lib.init(location.encode("utf-8"))
+    # print(user)
+    # print(location)
+    # print(libState)
+    def listenCode(code, lab, spin):
+        while (time.time() <= code.expires_in):
+            time.sleep(2)
+            token = lib.login_create_token(code.deviceCode)
+            if (token.status == 2):
+                print("Authorization Pending...")
+            elif (token.status == 1):
+                username = ffi.string(token.username).decode("utf-8")
+                countryCode = ffi.string(token.countryCode).decode("utf-8")
+                userId = token.userId
+                print("Authorization Successfull...")
+                print("Username: " + username)
+                print("CountryCode: " + countryCode)
+                print("UserId: " + str(userId))
+                break
+        if token.status == 1:
+            GLib.idle_add(lab.set_label, "Authorization successful!")
+            lis = futures.ThreadPoolExecutor(max_workers=4)
+            lis.submit(app.listener)
+            ldg = futures.ThreadPoolExecutor(max_workers=4)
+            ldg.submit(app.favver, which=["track", "artist", "playlist", "album"])
+            GLib.idle_add(app.bigStack.set_visible_child, app.builder.get_object("box"))
         else:
-            app.bigStack.set_visible_child(app.builder.get_object("loginBox"))
-    else:
+            GLib.idle_add(lab.set_label, "Error: Authorization timeout!")
+        GLib.idle_add(spin.stop)
+    if int(libState) == 0:
+        print("We have to login first")
+        code = lib.login_create_code()
+        userCode = ffi.string(code.userCode).decode("utf-8")
+        codeLab = app.builder.get_object("codeLab")
+        GLib.idle_add(codeLab.set_label, userCode)
         app.bigStack.set_visible_child(app.builder.get_object("loginBox"))
+        codd = futures.ThreadPoolExecutor(max_workers=4)
+        codd.submit(listenCode, code=code, lab=codeLab, spin=app.builder.get_object("waitSpin"))
+    elif int(libState) == 1:
+        print("Logged in")
+        lis = futures.ThreadPoolExecutor(max_workers=4)
+        lis.submit(app.listener)
+        ldg = futures.ThreadPoolExecutor(max_workers=4)
+        ldg.submit(app.favver, which=["track", "artist", "playlist", "album"])
+    # if confA:
+    #     pwd = keyring.get_password('tidal', emailC)
+    #     if pwd != None or pwd != "":
+    #         app.on_login(0, emailC, pwd)
+    #     else:
+    #         app.bigStack.set_visible_child(app.builder.get_object("loginBox"))
+    # else:
+    #     app.bigStack.set_visible_child(app.builder.get_object("loginBox"))
     os.system("mkdir -p /tmp/htidal/thumbnails")
     Gtk.main()

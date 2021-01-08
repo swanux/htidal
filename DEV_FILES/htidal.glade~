@@ -216,6 +216,8 @@
     <property name="use_fallback">True</property>
   </object>
   <object class="GtkWindow" id="main">
+    <property name="width_request">700</property>
+    <property name="height_request">450</property>
     <property name="can_focus">False</property>
     <property name="window_position">mouse</property>
     <property name="default_width">700</property>
@@ -305,7 +307,7 @@
                         <property name="margin_bottom">5</property>
                         <property name="label" translatable="yes">My Collection</property>
                         <attributes>
-                          <attribute name="weight" value="thin"/>
+                          <attribute name="weight" value="normal"/>
                           <attribute name="size" value="9000"/>
                         </attributes>
                       </object>
@@ -400,7 +402,7 @@
                         <property name="margin_bottom">5</property>
                         <property name="label" translatable="yes">Created by me</property>
                         <attributes>
-                          <attribute name="weight" value="thin"/>
+                          <attribute name="weight" value="normal"/>
                           <attribute name="size" value="9000"/>
                         </attributes>
                       </object>
@@ -2141,6 +2143,8 @@ Suite 330, Boston, MA  02111-1307  USA</property>
           <object class="GtkBox" id="loginBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkLabel" id="loginLabel">
@@ -2161,16 +2165,21 @@ Suite 330, Boston, MA  02111-1307  USA</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="email">
+              <object class="GtkLabel" id="codeLab">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="primary_icon_name">mail-unread</property>
-                <property name="placeholder_text" translatable="yes">Email</property>
-                <property name="input_purpose">email</property>
+                <property name="margin_top">20</property>
+                <property name="margin_bottom">20</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="label" translatable="yes">...</property>
+                <property name="selectable">True</property>
+                <attributes>
+                  <attribute name="variant" value="normal"/>
+                  <attribute name="size" value="30000"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2179,18 +2188,19 @@ Suite 330, Boston, MA  02111-1307  USA</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="pwd">
+              <object class="GtkLabel" id="helpLab">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="visibility">False</property>
-                <property name="invisible_char">●</property>
-                <property name="primary_icon_name">dialog-password</property>
-                <property name="placeholder_text" translatable="yes">Password</property>
-                <property name="input_purpose">password</property>
+                <property name="margin_left">20</property>
+                <property name="margin_right">20</property>
+                <property name="margin_top">20</property>
+                <property name="margin_bottom">20</property>
+                <property name="label" translatable="yes">Above is your User Code. Press the button below to authorize through browser or go manually to link.tidal.com</property>
+                <property name="justify">center</property>
+                <property name="wrap">True</property>
+                <attributes>
+                  <attribute name="weight" value="semibold"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2199,23 +2209,25 @@ Suite 330, Boston, MA  02111-1307  USA</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="doneBox">
+              <object class="GtkBox" id="auBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkCheckButton" id="remember">
-                    <property name="label" translatable="yes">Remember password</property>
+                  <object class="GtkButton" id="authBut">
+                    <property name="label" translatable="yes">Authorize</property>
+                    <property name="height_request">40</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="receives_default">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="halign">start</property>
-                    <property name="margin_left">10</property>
-                    <property name="margin_right">10</property>
-                    <property name="margin_top">10</property>
-                    <property name="margin_bottom">10</property>
+                    <property name="valign">center</property>
+                    <property name="margin_left">20</property>
+                    <property name="margin_right">20</property>
+                    <property name="margin_top">20</property>
+                    <property name="margin_bottom">20</property>
                     <property name="hexpand">True</property>
-                    <property name="draw_indicator">True</property>
-                    <signal name="toggled" handler="on_remember_toggled" swapped="no"/>
+                    <property name="vexpand">True</property>
+                    <signal name="clicked" handler="authBrowse" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2224,24 +2236,41 @@ Suite 330, Boston, MA  02111-1307  USA</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="logBut">
-                    <property name="label" translatable="yes">Login</property>
-                    <property name="width_request">200</property>
+                  <object class="GtkLabel" id="waitLab">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <property name="margin_left">10</property>
-                    <property name="margin_right">10</property>
-                    <property name="margin_top">10</property>
-                    <property name="margin_bottom">10</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
                     <property name="hexpand">True</property>
-                    <signal name="clicked" handler="on_login" swapped="no"/>
+                    <property name="vexpand">True</property>
+                    <property name="label" translatable="yes">Waiting for authorization...</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinner" id="waitSpin">
+                    <property name="width_request">50</property>
+                    <property name="height_request">50</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="margin_left">20</property>
+                    <property name="margin_right">20</property>
+                    <property name="margin_top">20</property>
+                    <property name="margin_bottom">20</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">False</property>
+                    <property name="active">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>

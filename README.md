@@ -1,6 +1,8 @@
 # HTidal Beta
 Unofficial Tidal client for Linux using tidalapi, Python3 and GTK3
 
+**Currently the whole program is being rewritten, so new features will be delayed until 0.2.**
+
 **Features:**
 
     -> Log in and remember password (with system keyring)
