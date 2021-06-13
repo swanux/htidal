@@ -1,7 +1,8 @@
+# Notice
+**Switched to Spotify, so won't continue this one after all. Feel free to reuse any part of the code (or improve the whole). I recommend the API mentioned below, and a new, WIP, faster API (and docs): https://github.com/Fokka-Engineering**
+
 # HTidal Beta
 Unofficial Tidal client for Linux using tidalapi, Python3 and GTK3
-
-**Currently the whole program is being rewritten, so new features will be delayed until 0.2.**
 
 **Features:**
 
